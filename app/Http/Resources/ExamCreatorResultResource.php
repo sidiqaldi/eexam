@@ -25,6 +25,7 @@ class ExamCreatorResultResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'participant' => $this->participant,
+            'finish_participant' => $this->finish_participant,
         ];
     }
 }

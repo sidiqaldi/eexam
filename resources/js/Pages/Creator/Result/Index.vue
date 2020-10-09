@@ -31,10 +31,14 @@
                     <table class="table-auto border-collapse border border-gray-300">
                         <thead>
                         <tr class="bg-white border border-gray-300">
-                            <th class="py-3">Nama</th>
-                            <th class="py-3">Deskripsi</th>
-                            <th class="py-3">Peserta</th>
-                            <th class="py-3">Aksi</th>
+                            <th rowspan="2" class="border py-3">Nama</th>
+                            <th rowspan="2" class="border py-3">Deskripsi</th>
+                            <th colspan="2" class="border py-3">Peserta</th>
+                            <th rowspan="2" class="border py-3">Aksi</th>
+                        </tr>
+                        <tr class="bg-white border border-gray-300">
+                            <th class="border p-3">Total</th>
+                            <th class="border p-3">Selesai</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -42,12 +46,13 @@
                             <td class="align-middle border px-4 py-2">{{ exam.name }}</td>
                             <td class="align-middle border px-4 py-2">{{ exam.description }}</td>
                             <td class="align-middle border px-4 py-2">{{ exam.participant }}</td>
+                            <td class="align-middle border px-4 py-2">{{ exam.finish_participant }}</td>
                             <td class="align-middle border px-4 py-2">
                                 <inertia-link class="underline" :href="'/creator/results/' + exam.uuid "> lihat hasil </inertia-link>
                             </td>
                         </tr>
                         <tr v-if="!exams.meta.total">
-                            <td class="text-center py-3" colspan="4">Tidak ada ujian</td>
+                            <td class="text-center py-3" colspan="5">Tidak ada ujian</td>
                         </tr>
                         </tbody>
                     </table>

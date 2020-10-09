@@ -32,6 +32,12 @@ class ResultController extends Controller
                         ->whereColumn('exam_id', 'exams.id')
                         ->limit(1)
                     ])
+                    ->addSelect(['finish_participant' => Participant::query()
+                        ->selectRaw('count(id)')
+                        ->whereColumn('exam_id', 'exams.id')
+                        ->whereNotNull('finish_at')
+                        ->limit(1)
+                    ])
                     ->owner(Auth::user())
                     ->paginate($perPage)
                     ->appends($request->all('search'))
@@ -41,14 +47,15 @@ class ResultController extends Controller
 
     public function exam(ShowExamRequest $request, Exam $exam)
     {
-        $participants = Recap::query()
-            ->select('*')
-            ->addSelect([
-                'rank' => DB::raw('FIND_IN_SET( total_score, (SELECT GROUP_CONCAT( total_score ORDER BY total_score DESC ) FROM recaps WHERE exam_id = recaps.exam_id )) as rank')
-            ])
-            ->with('participant')
+        $participants = Recap::with('participant')
+            ->select(DB::raw('recaps.* , CASE WHEN @curScore = NULL THEN @curRank := @curRank + 1 WHEN @curScore = recaps.total_score THEN @curRank ELSE @curRank := @curRank + 1 END AS rank, @curScore := recaps.total_score as Socre'))
+            ->from(DB::raw('recaps, (SELECT @curScore:= NULL, @curRank := 0) r'))
             ->where('exam_id', $exam->id)
-            ->orderBy('rank', 'asc')
+            ->whereHas('participant', function($q) {
+                $q->whereNotNull('finish_at');
+            })
+            ->orderBy('status', 'asc')
+            ->orderBy('total_score', 'desc')
             ->paginate();
 
         return Inertia::render('Creator/Result/Exam', [
