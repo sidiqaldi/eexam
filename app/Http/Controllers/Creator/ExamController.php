@@ -8,6 +8,7 @@ use App\Models\Exam;
 use App\Filters\ExamFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Creator\Exam\DestroyRequest;
+use App\Http\Requests\Creator\Exam\DuplicateRequest;
 use App\Http\Requests\Creator\Exam\PublishRequest;
 use App\Http\Requests\Creator\Exam\UpdateRequest;
 use App\Http\Requests\Creator\Exam\StoreRequest;
@@ -105,12 +106,13 @@ class ExamController extends Controller
     }
 
     /**
-     * @param PublishRequest $request
      * @param Exam $exam
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function publish(PublishRequest $request, Exam $exam)
+    public function publish(Exam $exam)
     {
+        $this->authorize('update', $exam);
+
         $validation = PublishExamService::validate($exam);
 
         if ($validation->isHasErrors()) {
@@ -122,5 +124,43 @@ class ExamController extends Controller
 
         return redirect()->back()
             ->with('success', __('notification.success.update', ['model' => __('Exam')]));
+    }
+
+    /**
+     * @param DuplicateRequest $request
+     * @param Exam $exam
+     * @return string
+     */
+    public function duplicate(DuplicateRequest $request, Exam $exam)
+    {
+        $exam = Exam::with(['config', 'sections.questions.options'])->where('id', $exam->id)->firstOrFail();
+
+        $new = $exam->replicate();
+
+        $new->name = $request->name;
+
+        $new->code = $request->code;
+
+        $new->status_id = ExamStatus::Draft;
+
+        $new->save();
+
+        $new->config()->save($exam->config->replicate());
+
+        foreach ($exam->sections as $section) {
+
+            $newSections = $new->sections()->save($section->replicate());
+
+            foreach ($section->questions as $question) {
+                $newQuestion = $newSections->questions()->save($question->replicate());
+
+                foreach($question->options as $option) {
+                    $newQuestion->options()->save($option->replicate());
+                }
+            }
+        }
+
+        return redirect()->route('creator.exams.index')
+            ->with('success', __('notification.success.add', ['model' => __('Exam')]));
     }
 }

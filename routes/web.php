@@ -27,6 +27,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function() {
         Route::get('/menu', 'App\Http\Controllers\HomeController@creator');
         Route::resource('/exams', 'App\Http\Controllers\Creator\ExamController');
         Route::put('/exams-publish/{exam}', 'App\Http\Controllers\Creator\ExamController@publish')->name('exams.publish');
+        Route::put('/exams-duplicate/{exam}', 'App\Http\Controllers\Creator\ExamController@duplicate')->name('exams.duplicate');
         Route::resource('/configs', 'App\Http\Controllers\Creator\ConfigController')->only('update');
         Route::prefix('/sections')->group(function () {
             Route::get('/{exam}', 'App\Http\Controllers\Creator\SectionController@index')->name('sections.index');
