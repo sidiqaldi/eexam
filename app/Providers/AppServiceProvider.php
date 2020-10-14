@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Preference;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
@@ -52,6 +54,9 @@ class AppServiceProvider extends ServiceProvider
                     'info' => Session::get('info'),
                 ];
             },
+            'preference' => function () {
+                return Preference::where('user_id' , Auth::id())->first();
+            }
         ]);
     }
 }

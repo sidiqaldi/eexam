@@ -46,6 +46,10 @@
                                         Profile
                                     </jet-dropdown-link>
 
+                                     <jet-dropdown-link href="/user/preference">
+                                        Preferensi
+                                    </jet-dropdown-link>
+
                                     <div class="border-t border-gray-100"></div>
 
                                     <!-- Authentication -->
@@ -103,6 +107,10 @@
                             Profile
                         </jet-responsive-nav-link>
 
+                        <jet-responsive-nav-link href="/user/preference" :active="$page.currentRouteName == 'profile.show'">
+                            Preferensi
+                        </jet-responsive-nav-link>
+
                         <jet-responsive-nav-link href="/user/api-tokens" :active="$page.currentRouteName == 'api-tokens.index'" v-if="$page.jetstream.hasApiFeatures">
                             API Tokens
                         </jet-responsive-nav-link>
@@ -138,8 +146,8 @@
                                 Switch Teams
                             </div>
 
-                            <template v-for="team in $page.user.all_teams">
-                                <form @submit.prevent="switchToTeam(team)">
+                            <template v-for="(team, index) in $page.user.all_teams">
+                                <form @submit.prevent="switchToTeam(team)" :key="index">
                                     <jet-responsive-nav-link as="button">
                                         <div class="flex items-center">
                                             <svg v-if="team.id == $page.user.current_team_id" class="mr-2 h-5 w-5 text-green-400" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -153,6 +161,8 @@
                 </div>
             </div>
         </nav>
+
+        <preference-form v-if="this.$page.preference == null" :preference="this.$page.preference" />
 
         <!-- Page Heading -->
         <header class="bg-white shadow">
@@ -184,7 +194,9 @@
     import JetDropdownLink from '@/Jetstream/DropdownLink'
     import JetNavLink from '@/Jetstream/NavLink'
     import JetResponsiveNavLink from '@/Jetstream/ResponsiveNavLink'
-    import FlashMessages from "@/Shared/FlashMessages";
+    import FlashMessages from '@/Shared/FlashMessages'
+    import Icon from '@/Shared/Icon'
+    import PreferenceForm from '@/Shared/PreferenceForm'
 
     export default {
         components: {
@@ -195,6 +207,7 @@
             JetNavLink,
             JetResponsiveNavLink,
             FlashMessages,
+            PreferenceForm,
         },
 
         props: {
