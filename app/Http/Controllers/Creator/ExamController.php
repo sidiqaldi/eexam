@@ -92,13 +92,14 @@ class ExamController extends Controller
     }
 
     /**
-     * @param DestroyRequest $request
      * @param Exam $exam
      * @return \Illuminate\Http\RedirectResponse
      * @throws \Exception
      */
-    public function destroy(DestroyRequest $request, Exam $exam)
+    public function destroy(Exam $exam)
     {
+        $this->authorize('delete', $exam);
+
         $exam->delete();
 
         return redirect()->route('creator.exams.index')

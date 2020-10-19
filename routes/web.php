@@ -23,7 +23,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function() {
 
     Route::get('/dashboard', 'App\Http\Controllers\HomeController@dashboard')->name('dashboard');
 
-    Route::put('/preference', 'App\Http\Controllers\PreferenceController@update')->name('preference.update');
+    Route::resource('/preference', 'App\Http\Controllers\PreferenceController')->only(['index', 'store']);
 
     Route::prefix('creator')->name('creator.')->group(function () {
         Route::get('/menu', 'App\Http\Controllers\HomeController@creator');

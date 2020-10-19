@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Exam;
+use App\Models\Participant;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -90,5 +91,18 @@ class ExamPolicy
     public function forceDelete(User $user, Exam $exam)
     {
         return $user->id === $exam->user_id;
+    }
+
+     /**
+     * Determine whether the user can show participant details.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Exam  $exam
+     * @param  \App\Models\Participant $participant
+     * @return mixed
+     */
+    public function participant(User $user, Exam $exam, Participant $participant)
+    {
+        return $user->id === $exam->user_id && $participant->finish_at;
     }
 }

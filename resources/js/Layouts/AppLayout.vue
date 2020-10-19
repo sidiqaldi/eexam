@@ -17,10 +17,10 @@
                             <jet-nav-link href="/dashboard" :active="$page.currentRouteName == 'dashboard'">
                                 Dashboard
                             </jet-nav-link>
-                            <jet-nav-link href="/creator/menu" :active="activeNavigation('creator.')">
+                            <jet-nav-link v-if="this.$page.preference != null && this.$page.preference.creator" href="/creator/menu" :active="activeNavigation('creator.')">
                                 {{ __('Creator') }}
                             </jet-nav-link>
-                            <jet-nav-link href="/participant/menu" :active="activeNavigation('participant.')">
+                            <jet-nav-link v-if="this.$page.preference != null && this.$page.preference.participant" href="/participant/menu" :active="activeNavigation('participant.')">
                                 {{ __('Participant') }}
                             </jet-nav-link>
                         </div>
@@ -46,7 +46,7 @@
                                         Profile
                                     </jet-dropdown-link>
 
-                                     <jet-dropdown-link href="/user/preference">
+                                     <jet-dropdown-link href="/preference">
                                         Preferensi
                                     </jet-dropdown-link>
 
@@ -81,10 +81,10 @@
                     <jet-responsive-nav-link href="/dashboard" :active="$page.currentRouteName == 'dashboard'">
                         Dashboard
                     </jet-responsive-nav-link>
-                    <jet-responsive-nav-link href="/creator/menu" :active="activeNavigation('creator.')">
+                    <jet-responsive-nav-link v-if="this.$page.preference != null && this.$page.preference.creator" href="/creator/menu" :active="activeNavigation('creator.')">
                         {{ __('Creator') }}
                     </jet-responsive-nav-link>
-                    <jet-responsive-nav-link href="/participant/menu" :active="activeNavigation('participant.')">
+                    <jet-responsive-nav-link v-if="this.$page.preference != null && this.$page.preference.participant" href="/participant/menu" :active="activeNavigation('participant.')">
                         {{ __('Participant') }}
                     </jet-responsive-nav-link>
                 </div>
@@ -107,7 +107,7 @@
                             Profile
                         </jet-responsive-nav-link>
 
-                        <jet-responsive-nav-link href="/user/preference" :active="$page.currentRouteName == 'profile.show'">
+                        <jet-responsive-nav-link href="/preference" :active="$page.currentRouteName == 'profile.show'">
                             Preferensi
                         </jet-responsive-nav-link>
 
@@ -162,7 +162,7 @@
             </div>
         </nav>
 
-        <preference-form v-if="this.$page.preference == null" :preference="this.$page.preference" />
+        <preference-form v-if="this.$page.preference == null" :preference="this.$page.preference" :pop="true" />
 
         <!-- Page Heading -->
         <header class="bg-white shadow">

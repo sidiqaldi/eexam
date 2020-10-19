@@ -45,8 +45,10 @@ class ResultController extends Controller
         ]);
     }
 
-    public function exam(ShowExamRequest $request, Exam $exam)
+    public function exam(Exam $exam)
     {
+        $this->authorize('update', $exam);
+
         $participants = Recap::with('participant')
             ->select(DB::raw('recaps.* , CASE WHEN @curScore = NULL THEN @curRank := @curRank + 1 WHEN @curScore = recaps.total_score THEN @curRank ELSE @curRank := @curRank + 1 END AS rank, @curScore := recaps.total_score as Socre'))
             ->from(DB::raw('recaps, (SELECT @curScore:= NULL, @curRank := 0) r'))
@@ -65,8 +67,10 @@ class ResultController extends Controller
 
     }
 
-    public function details(ShowParticipantRequest $request, Participant $participant)
+    public function details(Participant $participant)
     {
+        $this->authorize('participant', [$participant->exam, $participant]);
+
         return Inertia::render('Creator/Result/Participant', [
             'report' => RecapService::participantReport($participant)
         ]);
