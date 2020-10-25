@@ -92,6 +92,7 @@ return [
         'string' => ':attribute tidak boleh kurang dari :min karakter.',
         'array' => ':attribute tidak boleh kurang dari :min item.',
     ],
+    'multiple_of' => ':attribute harus kelipatan dari :value',
     'not_in' => ':attribute yang dipilih tidak valid.',
     'not_regex' => ':attribute format tidak valid.',
     'numeric' => ':attribute harus berupa angka.',
