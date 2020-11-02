@@ -125,6 +125,8 @@ return [
     'no_sections' => 'Ujian ini belum memiliki sesi.',
     'need_question' => 'Ujian ini belum cukup memiliki soal agar peserta dapat lulus.',
     'participate' => 'Anda telah mengikuti ujian ini.',
+    'section_time_limit' => 'Batas waktu di tiap sesi tidak boleh melebihi batas waktu pada config utama.',
+    'question_time_limit' => 'Batas waktu di tiap soal tidak boleh melebihi batas waktu pada config utama.',
 
     /*
     |--------------------------------------------------------------------------
@@ -174,7 +176,9 @@ return [
 
     'values' => [
         'time_mode' => [
-            TimeMode::TimeLimit => 'Batas waktu'
+            TimeMode::TimeLimit => 'Batas waktu',
+            TimeMode::PerSection => 'Tiap Sesi',
+            // TimeMode::PerQuestion => 'Tiap Soal',
         ],
     ],
 

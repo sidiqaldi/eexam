@@ -14,7 +14,7 @@ class OrderRequest extends FormRequest
      */
     public function authorize()
     {
-        return $this->route('section')->user_id == Auth::id();
+        return Auth::user()->can('update', $this->section);
     }
 
     /**

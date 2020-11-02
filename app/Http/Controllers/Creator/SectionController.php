@@ -33,6 +33,8 @@ class SectionController extends Controller
      */
     public function create(Exam $exam)
     {
+        $this->authorize('update', $exam);
+
         return Inertia::render('Creator/Section/Create', [
             'exam' => $exam,
             'config' => $exam->config,
@@ -53,12 +55,13 @@ class SectionController extends Controller
     }
 
     /**
-     * @param EditRequest $request
      * @param Section $section
      * @return \Inertia\Response
      */
-    public function edit(EditRequest $request, Section $section)
+    public function edit(Section $section)
     {
+        $this->authorize('update', $section);
+
         $exam = $section->exam;
 
         return Inertia::render('Creator/Section/Edit', [
@@ -106,13 +109,14 @@ class SectionController extends Controller
     }
 
     /**
-     * @param DestroyRequest $request
      * @param Section $section
      * @return \Illuminate\Http\RedirectResponse
      * @throws \Exception
      */
-    public function destroy(DestroyRequest $request, Section $section)
+    public function destroy(Section $section)
     {
+        $this->authorize('delete', $section);
+
         Section::query()->where('exam_id', $section->exam_id)
             ->where('order', '>', $section->order)
             ->decrement('order');

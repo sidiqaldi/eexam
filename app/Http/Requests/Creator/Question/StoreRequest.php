@@ -7,6 +7,7 @@ use App\Enums\InputType;
 use App\Enums\PassingGradeStatus;
 use App\Enums\ScoreStatus;
 use App\Models\Config;
+use App\Models\Question;
 use App\Rules\CorrectValue;
 use App\Models\Section;
 use Illuminate\Foundation\Http\FormRequest;
@@ -31,7 +32,7 @@ class StoreRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return Auth::user()->can('update', $this->section);
     }
 
     /**

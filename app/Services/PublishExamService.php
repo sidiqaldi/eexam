@@ -3,6 +3,7 @@ namespace App\Services;
 
 use App\Enums\PassingGradeStatus;
 use App\Enums\ScoreStatus;
+use App\Enums\TimeMode;
 use App\Models\Exam;
 use App\Models\Question;
 
@@ -88,6 +89,19 @@ class PublishExamService
 
             }
         }
+
+        if ($config->time_mode == TimeMode::PerSection) {
+            if ($sections->sum('time_limit') > $config->time_limit) {
+                return new self(['exam' => [__('validation.section_time_limit')]]);
+            }
+        }
+
+        //todo: next update
+        // if ($config->time_mode == TimeMode::PerQuestion) {
+        //     if (Question::whereIn('section_id', $sectionId)->sum('time_limit') > $config->time_limit) {
+        //         return new self(['exam' => [__('validation.question_time_limit')]]);
+        //     }
+        // }
 
         return new self(null);
     }

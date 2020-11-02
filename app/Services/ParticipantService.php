@@ -9,6 +9,7 @@ use App\Models\Exam;
 use App\Models\Participant;
 use App\Models\Section;
 use App\Services\Exams\BasicExam;
+use App\Services\Exams\SectionLimitExam;
 use App\Services\Exams\TimeLimitExam;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -37,6 +38,8 @@ class ParticipantService
 
         if ($config->time_mode == TimeMode::TimeLimit) {
             static::$service = new TimeLimitExam();
+        } elseif ($config->time_mode == TimeMode::PerSection) {
+            static::$service = new SectionLimitExam();
         } else {
             static::$service = new BasicExam();
         }

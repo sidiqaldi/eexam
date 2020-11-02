@@ -40,6 +40,7 @@
                 <jet-section-border/>
 
                 <edit-config class="md:grid md:grid-cols-3 md:gap-6 mt-10 sm:mt-0" :answer_order="answer_order"
+                             :visibility_status="visibility_status"
                              :config="config"
                              :exam="exam"
                              :question_order="question_order"
@@ -94,6 +95,7 @@ export default {
         EditConfig,
     },
     props: {
+        visibility_status: Object,
         question_order: Object,
         answer_order: Object,
         ranking_status: Object,

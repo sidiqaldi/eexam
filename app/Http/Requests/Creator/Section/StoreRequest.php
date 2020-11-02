@@ -4,10 +4,12 @@ namespace App\Http\Requests\Creator\Section;
 
 use App\Enums\PassingGradeStatus;
 use App\Enums\ScoreStatus;
+use App\Enums\TimeMode;
 use App\Models\Config;
 use App\Models\Exam;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 /**
  * @property mixed exam
@@ -21,7 +23,7 @@ class StoreRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return Auth::user()->can('update', $this->exam);
     }
 
     /**
@@ -31,7 +33,16 @@ class StoreRequest extends FormRequest
      */
     public function rules()
     {
+        $timeMode = $this->exam->config->time_mode === TimeMode::PerSection;
+
         return [
+            'time_limit' => [
+                Rule::requiredIf($timeMode),
+                'nullable',
+                'numeric',
+                'min:5',
+                'max:360',
+            ],
             'name' => 'required|min:10|max:150',
             'instruction' => 'required|min:10|max: 255',
             'score_per_question' => 'required|numeric|min:1|max:1000',
@@ -49,6 +60,7 @@ class StoreRequest extends FormRequest
             'name' => $this->input('name'),
             'user_id' => Auth::id(),
             'exam_id' => $exam->id,
+            'time_limit' => $this->input('time_limit'),
             'instruction' => $this->input('instruction'),
             'score_per_question' => $this->input('score_per_question'),
             'passing_grade' => $this->input('passing_grade'),

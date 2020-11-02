@@ -11,6 +11,11 @@
                     slot-scope="props"
                 >Time Remaining：{{ props.minutes }} minutes, {{ props.seconds }} seconds.</template>
             </vue-countdown>
+            <vue-countdown v-if="config.data.time_mode == 3" :time="time_limit" tag="p" @end="forceFinish">
+                <template
+                    slot-scope="props"
+                >Sesi Time Remaining：{{ props.minutes }} minutes, {{ props.seconds }} seconds.</template>
+            </vue-countdown>
         </template>
 
         <div>

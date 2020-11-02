@@ -29,7 +29,7 @@ class UpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        return $this->route('question')->user_id == Auth::id();
+        return Auth::user()->can('update', $this->question);
     }
 
     /**

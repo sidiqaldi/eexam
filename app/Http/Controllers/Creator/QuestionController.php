@@ -38,6 +38,8 @@ class QuestionController extends Controller
      */
     public function create(Section $section)
     {
+        $this->authorize('update', $section);
+
         return Inertia::render('Creator/Question/Create', [
             'exam' => $section->exam,
             'section' => $section,
@@ -66,12 +68,13 @@ class QuestionController extends Controller
     }
 
     /**
-     * @param EditRequest $request
      * @param Question $question
      * @return \Inertia\Response
      */
-    public function edit(EditRequest $request, Question $question)
+    public function edit(Question $question)
     {
+        $this->authorize('update', $question);
+
         $section = $question->section;
 
         return Inertia::render('Creator/Question/Edit', [
@@ -137,13 +140,14 @@ class QuestionController extends Controller
     }
 
     /**
-     * @param DestroyRequest $request
      * @param Question $question
      * @return \Illuminate\Http\RedirectResponse
      * @throws \Exception
      */
-    public function destroy(DestroyRequest $request, Question $question)
+    public function destroy(Question $question)
     {
+        $this->authorize('delete', $question);
+
         Question::query()->where('section_id', $question->section_id)
             ->where('order', '>', $question->order)
             ->decrement('order');

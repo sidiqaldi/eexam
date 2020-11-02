@@ -16,7 +16,6 @@ use App\Http\Resources\ExamResource;
 use App\Services\ConfigService;
 use App\Services\PublishExamService;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -47,6 +46,8 @@ class ExamController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Exam::class);
+
         return Inertia::render('Creator/Exam/Create');
     }
 
@@ -70,6 +71,8 @@ class ExamController extends Controller
      */
     public function edit(Exam $exam)
     {
+        $this->authorize('update', $exam);
+
         $options = ConfigService::getConfigOptions();
 
         return Inertia::render('Creator/Exam/Edit', array_merge([

@@ -14,6 +14,6 @@ final class TimeMode extends Enum implements LocalizedEnum
 {
     const NoLimit = 1;
     const TimeLimit = 2;
-    //const PerSection = 3;
+    const PerSection = 3;
     //const PerQuestion = 4;
 }

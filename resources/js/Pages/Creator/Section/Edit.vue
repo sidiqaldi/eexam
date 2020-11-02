@@ -28,6 +28,19 @@
                     </template>
 
                     <template #form>
+
+                         <div v-if="parseInt(config.time_mode) === 3" class="col-span-6 sm:col-span-4">
+                            <jet-label for="time_limit" value="Batas waktu *"/>
+                            <jet-input
+                                id="time_limit"
+                                v-model="form.time_limit"
+                                class="mt-1 block w-full"
+                                placeholder="Batas waktu (dalam menit)"
+                                type="number"
+                            />
+                            <jet-input-error :message="$page.errors.time_limit" class="mt-2"/>
+                        </div>
+
                         <div class="col-span-6 sm:col-span-4">
                             <jet-label for="section-name" value="Nama Sesi *"/>
                             <jet-input id="section-name" ref="exam-name" v-model="form.name" autocomplete="section-name"

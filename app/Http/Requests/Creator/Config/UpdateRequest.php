@@ -9,8 +9,11 @@ use App\Enums\RankingStatus;
 use App\Enums\ResultStatus;
 use App\Enums\ScoreStatus;
 use App\Enums\TimeMode;
+use App\Enums\VisibilityStatus;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\RequiredIf;
 
 /**
  * @property mixed time_limit
@@ -33,7 +36,7 @@ class UpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return Auth::user()->can('update', $this->config);
     }
 
     /**
@@ -43,13 +46,21 @@ class UpdateRequest extends FormRequest
      */
     public function rules()
     {
+        $request = $this;
+
         return [
+            'visibility_status' => [
+                'required',
+                Rule::in(VisibilityStatus::getValues())
+            ],
             'time_mode' => [
                 'required',
                 Rule::in(TimeMode::getValues())
             ],
             'time_limit' => [
-                'required_if:time_mode,'.TimeMode::TimeLimit,
+                Rule::requiredIf(function () use ($request) {
+                    return $request->input('time_mode') != TimeMode::NoLimit;
+                }),
                 'nullable',
                 'numeric',
                 'min:5',
@@ -100,6 +111,7 @@ class UpdateRequest extends FormRequest
     public function data()
     {
         return [
+            'visibility_status' => $this->visibility_status,
             'time_limit' => $this->time_limit,
             'time_mode' => $this->time_mode,
             'question_order' => $this->question_order,

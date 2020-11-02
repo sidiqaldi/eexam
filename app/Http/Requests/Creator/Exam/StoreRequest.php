@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Creator\Exam;
 
+use App\Models\Exam;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,7 +15,7 @@ class StoreRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return Auth::user()->can('create', Exam::class);;
     }
 
     /**

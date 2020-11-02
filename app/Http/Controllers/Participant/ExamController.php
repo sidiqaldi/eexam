@@ -68,25 +68,27 @@ class ExamController extends Controller
     }
 
     /**
-     * @param ProcessRequest $request
      * @param Participant $participant
      * @param Exam $exam
      * @return mixed
      */
-    public function continue(ProcessRequest $request, Participant $participant, Exam $exam)
+    public function continue(Participant $participant, Exam $exam)
     {
+        $this->authorize('process', $participant);
+
         return ParticipantService::join($exam);
     }
 
     /**
-     * @param ProcessRequest $request
      * @param Participant $participant
      * @param Answer $answer
      * @param Section $section
      * @return \Inertia\Response
      */
-    public function section(ProcessRequest $request, Participant $participant, Answer $answer, Section $section)
+    public function section(Participant $participant, Answer $answer, Section $section)
     {
+        $this->authorize('process', $participant);
+
         ParticipantService::validateStatus($participant, $section, $answer);
 
         $exam = $participant->exam;
@@ -107,13 +109,14 @@ class ExamController extends Controller
     }
 
     /**
-     * @param ProcessRequest $request
      * @param Participant $participant
      * @param Answer $answer
      * @return \Inertia\Response
      */
-    public function process(ProcessRequest $request, Participant $participant, Answer $answer)
+    public function process(Participant $participant, Answer $answer)
     {
+        $this->authorize('process', $participant);
+
         ParticipantService::validateStatus($participant);
 
         $exam = $participant->exam;
@@ -140,14 +143,15 @@ class ExamController extends Controller
     }
 
     /**
-     * @param ProcessRequest $request
      * @param Participant $participant
      * @param Answer $answer
      * @param Option $option
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function submit(ProcessRequest $request, Participant $participant, Answer $answer, Option $option)
+    public function submit(Participant $participant, Answer $answer, Option $option)
     {
+        $this->authorize('process', $participant);
+
         ParticipantService::validateStatus($participant);
 
         $answer->option_id = $option->id;
@@ -162,13 +166,14 @@ class ExamController extends Controller
     }
 
     /**
-     * @param ProcessRequest $request
      * @param Participant $participant
      * @param Answer $answer
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function previous(ProcessRequest $request, Participant $participant, Answer $answer)
+    public function previous(Participant $participant, Answer $answer)
     {
+        $this->authorize('process', $participant);
+
         $answers = ParticipantService::getParticipantAnswers($participant);
         $navigation = ParticipantService::getNavigation($participant, $answer, $answers);
 
@@ -176,12 +181,13 @@ class ExamController extends Controller
     }
 
     /**
-     * @param ProcessRequest $request
      * @param Participant $participant
      * @return \Inertia\Response
      */
-    public function recap(ProcessRequest $request, Participant $participant)
+    public function recap(Participant $participant)
     {
+        $this->authorize('process', $participant);
+
         $exam = $participant->exam;
 
         $answers = ParticipantService::getParticipantAnswers($participant);
@@ -195,12 +201,13 @@ class ExamController extends Controller
     }
 
     /**
-     * @param ProcessRequest $request
      * @param Participant $participant
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function finish(ProcessRequest $request, Participant $participant)
+    public function finish(Participant $participant)
     {
+        $this->authorize('process', $participant);
+
         return ParticipantService::finish($participant);
     }
 }

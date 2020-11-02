@@ -9,6 +9,7 @@ use App\Enums\RankingStatus;
 use App\Enums\ResultStatus;
 use App\Enums\ScoreStatus;
 use App\Enums\TimeMode;
+use App\Enums\VisibilityStatus;
 use App\Models\Exam;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,6 +25,7 @@ class ConfigService
             'ranking_status' => RankingStatus::asSelectArray(),
             'score_status' => ScoreStatus::asSelectArray(),
             'passing_grade_status' => PassingGradeStatus::asSelectArray(),
+            'visibility_status' => VisibilityStatus::asSelectArray(),
         ];
     }
 
@@ -32,6 +34,7 @@ class ConfigService
         return [
             'user_id' => Auth::user()->id,
             'exam_id' => $exam->id,
+            'visibility_status' => VisibilityStatus::Private,
             'time_limit' => null,
             'time_mode' => TimeMode::NoLimit,
             'question_order' => QuestionOrderStatus::Sequence,
