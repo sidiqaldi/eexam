@@ -19,7 +19,14 @@ use Ramsey\Uuid\Uuid;
  */
 class Answer extends Model
 {
-    protected $fillable = ['user_id', 'participant_id', 'section_id', 'question_id'];
+    protected $fillable = ['user_id', 'participant_id', 'section_id', 'question_id', 'start_at', 'finish_at'];
+
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'start_at',
+        'finish_at',
+    ];
 
     /**
      * Setup model event hooks

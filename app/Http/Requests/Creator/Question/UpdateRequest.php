@@ -5,6 +5,7 @@ namespace App\Http\Requests\Creator\Question;
 use App\Enums\CorrectStatus;
 use App\Enums\InputType;
 use App\Enums\ScoreStatus;
+use App\Enums\TimeMode;
 use App\Models\Config;
 use App\Rules\CorrectValue;
 use Illuminate\Foundation\Http\FormRequest;
@@ -19,6 +20,7 @@ use Illuminate\Validation\Rule;
  * @property mixed question_type
  * @property mixed question_image
  * @property mixed options
+ * @property mixed time_limit
  */
 class UpdateRequest extends FormRequest
 {
@@ -39,7 +41,16 @@ class UpdateRequest extends FormRequest
      */
     public function rules()
     {
+        $timeMode = Config::where('exam_id', $this->question->section->exam_id)->first()->time_mode === TimeMode::PerQuestion;
+
         return [
+            'time_limit' => [
+                Rule::requiredIf($timeMode),
+                'nullable',
+                'numeric',
+                'min:5',
+                'max:3600',
+            ],
             'score' => [
                 'required',
                 'numeric',
@@ -115,6 +126,7 @@ class UpdateRequest extends FormRequest
     public function dataQuestion()
     {
         return [
+            'time_limit' => $this->time_limit,
             'score' => $this->score,
             'title' => $this->question_title,
             'value' => $this->question_value,

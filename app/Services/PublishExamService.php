@@ -85,23 +85,36 @@ class PublishExamService
                         return new self(['exam' => [__('validation.need_question')]]);
                     }
                 }
-
-
             }
         }
 
         if ($config->time_mode == TimeMode::PerSection) {
+            if ($exam->sections()
+                ->where('time_limit', NUll)
+                ->orWhere('time_limit', 0)
+                ->count()
+            ) {
+                return new self(['exam' => [__('validation.section_time_limit_empty')]]);
+            }
+
             if ($sections->sum('time_limit') > $config->time_limit) {
                 return new self(['exam' => [__('validation.section_time_limit')]]);
             }
         }
 
-        //todo: next update
-        // if ($config->time_mode == TimeMode::PerQuestion) {
-        //     if (Question::whereIn('section_id', $sectionId)->sum('time_limit') > $config->time_limit) {
-        //         return new self(['exam' => [__('validation.question_time_limit')]]);
-        //     }
-        // }
+        if ($config->time_mode == TimeMode::PerQuestion) {
+            if (Question::whereIn('section_id', $sectionId)
+                ->where('time_limit', NUll)
+                ->orWhere('time_limit', 0)
+                ->count()
+            ) {
+                return new self(['exam' => [__('validation.question_time_limit_empty')]]);
+            }
+
+             if (Question::whereIn('section_id', $sectionId)->sum('time_limit') / 60 > $config->time_limit) {
+                 return new self(['exam' => [__('validation.question_time_limit')]]);
+             }
+         }
 
         return new self(null);
     }

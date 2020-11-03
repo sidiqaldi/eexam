@@ -11,13 +11,16 @@
             <div class="grid max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
                 <div class="w-full bg-white p-5">
                     <div class="p-3">
-                        <div>
+                        <div v-if="config.data.time_mode === 3 || config.data.time_mode === 4">
+                            <p>Anda telah mengerjakan ujian ini.</p>
+                        </div>
+                        <div v-else>
                             <p>Anda telah mengerjakan <b>{{ totalFilled }}</b> dari <b>{{ totalQuestion }}</b> Soal.</p>
                             <p>Untuk memeriksa jawaban anda kembali dapat dengan menekan tombol pada indeks berikut:.</p>
                         </div>
                     </div>
 
-                    <div class="col-span-3 md:col-span-1 p-3 mb-5">
+                    <div v-if="config.data.time_mode === 1 || config.data.time_mode === 2" class="col-span-3 md:col-span-1 p-3 mb-5">
                         <b> Indeks: </b>
                         <div class="flex flex-wrap mt-3">
                             <inertia-link

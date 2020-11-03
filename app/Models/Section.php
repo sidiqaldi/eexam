@@ -20,6 +20,7 @@ use Ramsey\Uuid\Uuid;
  * @property mixed exam
  * @property mixed questions
  * @property mixed exam_id
+ * @property mixed user_id
  */
 class Section extends Model
 {

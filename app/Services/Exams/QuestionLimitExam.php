@@ -9,7 +9,7 @@ use App\Models\Participant;
 use Carbon\Carbon;
 use Illuminate\Http\Response;
 
-class SectionLimitExam extends BasicExam
+class QuestionLimitExam extends BasicExam
 {
     public function onGoing(Participant $participant)
     {
@@ -21,7 +21,7 @@ class SectionLimitExam extends BasicExam
 
         $now = Carbon::now();
 
-        if ($config->time_mode == TimeMode::PerSection) {
+        if ($config->time_mode == TimeMode::PerQuestion) {
             if ($now->gt($participant->created_at->addMinutes($config->time_limit))) {
                 $this->markAsFinish($participant, $participant->created_at->addMinutes($config->time_limit));
                 return false;
@@ -41,30 +41,16 @@ class SectionLimitExam extends BasicExam
                 ->withSectionOrder()
                 ->where('participant_id', $participant->id)
                 ->where('option_id', NULL)
-                ->where('start_at', NULL)
                 ->where('finish_at', NULL)
                 ->orderBy('section_order', 'asc')
                 ->orderBy('id', 'asc')
                 ->first()
-            ?? (
-                Answer::query()
-                    ->withSectionOrder()
-                    ->where('participant_id', $participant->id)
-                    ->where('finish_at', NULL)
-                    ->orderBy('section_order', 'asc')
-                    ->orderBy('id', 'desc')
-                    ->first()
-                ??
-                null
-            );
+            ?? null;
     }
 
     public function participantAnswer($participant, $section = null)
     {
         return Answer::query()
-            ->when($section, function ($q) use ($section) {
-                $q->where('section_id', $section->id);
-            })
             ->withSectionOrder()
             ->withOptionUuid()
             ->where('participant_id', $participant->id)
@@ -75,7 +61,7 @@ class SectionLimitExam extends BasicExam
 
     public function validateStatus(Participant $participant, $section, $answer)
     {
-        if ($section) {
+        if ($answer) {
             $this->startSection($participant, $section, $answer);
         }
 
@@ -85,14 +71,27 @@ class SectionLimitExam extends BasicExam
 
         if ($answer) {
             $answer = Answer::query()->find($answer->id);
-            if ($now->gt($answer->start_at->addMinutes($section->time_limit))) {
+
+            if ($answer->finish_at) {
 
                 $this->endSection($participant, $section, $answer);
 
                 $nextAnswer = $this->firstQuestion($participant);
-                $nextSection = $nextAnswer ? $this->currentSection($participant) : null;
 
-                return $this->goToNextSection($participant, $nextSection, $nextAnswer);
+                $currentSection = $nextAnswer ? $this->currentSection($participant) : null;
+
+                return $this->goToNextQuestion($participant, $currentSection, $nextAnswer);
+            }
+
+            if ($now->gt($answer->start_at->addSeconds($section->time_limit, false))) {
+
+                $this->endSection($participant, $section, $answer);
+
+                $nextAnswer = $this->firstQuestion($participant);
+
+                $currentSection = $nextAnswer ? $this->currentSection($participant) : null;
+
+                return $this->goToNextQuestion($participant, $currentSection, $nextAnswer);
             }
         }
 
@@ -100,37 +99,43 @@ class SectionLimitExam extends BasicExam
             $this->markAsFinish($participant, $participant->created_at->addMinutes($config->time_limit));
             return abort(Response::HTTP_UNAUTHORIZED);
         }
+
+        return null;
     }
 
-    public function goToNextSection($participant, $section, $answer)
+    public function goToNextQuestion($participant, $section, $answer)
     {
         if ($answer == null) {
             $this->markAsFinish($participant, Carbon::now());
-            return redirect()->route('participant.exams.recap', $participant->uuid);
+            return route('participant.exams.recap', $participant->uuid);
         }
 
-        return redirect()->route('participant.exams.section', [
+        if ($section->id == $answer->section_id) {
+
+            return route('participant.exams.process', [
+                'participant' => $participant->uuid,
+                'answer' => $answer->uuid,
+            ]);
+        }
+
+        return route('participant.exams.section', [
             'participant' => $participant->uuid,
-            'answer' => $section->uuid,
+            'answer' => $answer->section->uuid,
             'section' => $answer->uuid,
         ]);
     }
 
     public function startSection($participant, $section, $answer)
     {
-        Answer::query()
-            ->where('participant_id', $participant->id)
-            ->where('section_id', $section->id)
-            ->where('start_at', NUll)
-            ->update(['start_at' => Carbon::now()]);
+        if (!$answer->start_at) {
+            $answer->update(['start_at' => Carbon::now()]);
+        }
     }
 
     public function endSection($participant, $section, $answer)
     {
-        Answer::query()
-            ->where('participant_id', $participant->id)
-            ->where('section_id', $section->id)
-            ->where('finish_at', NUll)
-            ->update(['finish_at' => Carbon::now()]);
+        if (!$answer->finish_at) {
+            $answer->update(['finish_at' => Carbon::now()]);
+        }
     }
 }

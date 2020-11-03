@@ -40,7 +40,7 @@
                             </td>
                         </tr>
                         <tr v-if="!participants.meta.total">
-                            <td class="text-center py-3" colspan="6">Tidak ada ujian</td>
+                            <td class="text-center py-3" colspan="6">Belum ada perserta ujian yang selesai.</td>
                         </tr>
                         </tbody>
                     </table>

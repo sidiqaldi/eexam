@@ -9,12 +9,17 @@
             <vue-countdown v-if="config.data.time_mode == 2" :time="time_limit" tag="p" @end="forceFinish">
                 <template
                     slot-scope="props"
-                >Time Remaining：{{ props.minutes }} minutes, {{ props.seconds }} seconds.</template>
+                >Sisa waktu：{{ props.minutes }} minutes, {{ props.seconds }} seconds.</template>
             </vue-countdown>
-            <vue-countdown v-if="config.data.time_mode == 3" :time="time_limit" tag="p" @end="forceFinish">
+            <vue-countdown v-if="config.data.time_mode == 3" :time="section_limit" tag="p" @end="forceNextSection">
                 <template
                     slot-scope="props"
-                >Sesi Time Remaining：{{ props.minutes }} minutes, {{ props.seconds }} seconds.</template>
+                >Sisa waktu sesi：{{ props.minutes }} minutes, {{ props.seconds }} seconds.</template>
+            </vue-countdown>
+            <vue-countdown v-if="config.data.time_mode == 4" :time="question_limit" tag="p" @end="forceNextQuestion">
+                <template
+                    slot-scope="props"
+                >Sisa waktu sesi：{{ props.minutes }} minutes, {{ props.seconds }} seconds.</template>
             </vue-countdown>
         </template>
 
@@ -90,7 +95,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-span-3 md:col-span-1 border-l-0 md:border-l p-3">
+                        <div v-if="config.data.time_mode !== 4" class="col-span-3 md:col-span-1 border-l-0 md:border-l p-3">
                             <div class="row">
                                 <p><b> Indeks: </b></p>
                                 <p>Anda telah mengerjakan <b>{{ totalFilled }}</b> dari <b>{{ totalQuestion }}</b> Soal.</p>
@@ -104,10 +109,40 @@
                                     v-bind:class="{ 'bg-green-300' : answerItem.filled && !isActiveAnswer(answerItem.uuid) ,'bg-gray-300' : isActiveAnswer(answerItem.uuid)}">
                                     {{ index + 1 }}
                                 </inertia-link>
-                                <inertia-link
+                                <div class="flex" v-if="config.data.time_mode !== 4">
+                                    <button
+                                        @click="finishSectionConfirm = true"
+                                        class="flex m-1 border py-2 px-4">Selesai Sesi ini
+                                    </button>
+                                    <jet-dialog-modal :show="finishSectionConfirm" @close="finishSectionConfirm = false">
+                                        <template #title>
+                                            Konfirmasi
+                                        </template>
+
+                                        <template #content>
+                                            <p>Apakah anda yakin untuk menyelesaikan sesi ini sebelum waktu selesai?</p>
+                                            <small class="text-red-500">
+                                                <strong>Peringatan!</strong> anda tidak bisa kembali ke sesi sebelumnya.
+                                            </small>
+                                        </template>
+
+                                        <template #footer>
+                                            <jet-secondary-button
+                                                @click.native="finishSectionConfirm = false">
+                                                Batal
+                                            </jet-secondary-button>
+                                            <jet-button
+                                                @click.native="forceNextSection">
+                                                Lanjutkan
+                                            </jet-button>
+                                        </template>
+                                    </jet-dialog-modal>
+                                </div>
+                                <inertia-link v-else
                                     :href="'/participant/exams/recap/' + participant.data.uuid"
                                     class="flex m-1 border py-2 px-4">Selesai
                                 </inertia-link>
+
                             </div>
                         </div>
                     </div>
@@ -127,9 +162,11 @@ import JetSecondaryButton from '@/Jetstream/SecondaryButton'
 import marked from 'marked'
 import VueCountdown from '@chenfengyuan/vue-countdown'
 import Purify from 'dompurify';
+import Button from "../../../Jetstream/Button";
 
 export default {
     components: {
+        Button,
         Icon,
         Layout,
         ButtonLoading,
@@ -150,6 +187,8 @@ export default {
         section: Object,
         navigation: Object,
         time_limit: Number,
+        section_limit: Number,
+        question_limit: Number,
     },
 
     computed: {
@@ -188,6 +227,8 @@ export default {
     data() {
         return {
             openInstruction: false,
+
+            finishSectionConfirm: false,
 
             cantSave: false,
 
@@ -230,6 +271,14 @@ export default {
             } else {
                 this.cantSave = true
             }
+        },
+
+        forceNextSection() {
+            this.$inertia.post('/participant/exams/next-section/' + this.participant.data.uuid  + '/' + this.section.data.uuid)
+        },
+
+        forceNextQuestion() {
+            this.$inertia.post('/participant/exams/next-question/' + this.participant.data.uuid  + '/' + this.answer.data.uuid)
         },
 
         forceFinish() {

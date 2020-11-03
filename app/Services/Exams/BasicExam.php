@@ -45,7 +45,7 @@ class BasicExam
             }
         }
 
-        $participant = Participant::query()->find($participant->getAttribute('id'));
+        $participant = Participant::find($participant->getAttribute('id'));
 
         RecapService::init($participant);
 
@@ -67,8 +67,7 @@ class BasicExam
 
     public function ListQuestion(Participant $participant)
     {
-        return Answer::query()
-            ->withSectionOrder()
+        return Answer::withSectionOrder()
             ->where('participant_id', $participant->id)
             ->orderBy('section_order', 'asc')
             ->orderBy('id', 'asc')
@@ -81,15 +80,13 @@ class BasicExam
      */
     public function firstQuestion(Participant $participant)
     {
-        return Answer::query()
-            ->withSectionOrder()
+        return Answer::withSectionOrder()
             ->where('participant_id', $participant->id)
             ->where('option_id', NULL)
             ->orderBy('section_order', 'asc')
             ->orderBy('id', 'asc')
             ->first()
-            ?? Answer::query()
-                ->withSectionOrder()
+            ?? Answer::withSectionOrder()
                 ->where('participant_id', $participant->id)
                 ->orderBy('section_order', 'asc')
                 ->orderBy('id', 'desc')
@@ -103,6 +100,16 @@ class BasicExam
         return $question->section;
     }
 
+    public function participantAnswer($participant, $section = null)
+    {
+        return Answer::withSectionOrder()
+            ->withOptionUuid()
+            ->where('participant_id', $participant->id)
+            ->orderBy('section_order', 'asc')
+            ->orderBy('id', 'asc')
+            ->get();
+    }
+
     public function onGoing(Participant $participant)
     {
         if (!empty($participant->finish_at)) {
@@ -113,6 +120,16 @@ class BasicExam
     }
 
     public function validateStatus(Participant $participant, $section, $answer)
+    {
+        return true;
+    }
+
+    public function startSection($participant, $section, $answer)
+    {
+        return true;
+    }
+
+    public function endSection($participant, $section, $answer)
     {
         return true;
     }

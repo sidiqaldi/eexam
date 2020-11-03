@@ -51,7 +51,7 @@
                              :passing_grade_status="passing_grade_status"/>
                 <jet-section-border/>
 
-                <jet-form-section @submitted="false" class="md:grid md:grid-cols-3 md:gap-6 mt-10 sm:mt-0">
+                <jet-form-section v-if="exam.status_id === 1" @submitted="false" class="md:grid md:grid-cols-3 md:gap-6 mt-10 sm:mt-0">
                     <template #title>
                         <icon class="inline" name="list-task"/>
                         Sesi & Soal

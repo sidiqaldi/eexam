@@ -43,6 +43,7 @@ class ExamController extends Controller
 
     /**
      * @return \Inertia\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function create()
     {
@@ -68,6 +69,7 @@ class ExamController extends Controller
     /**
      * @param Exam $exam
      * @return \Inertia\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function edit(Exam $exam)
     {
@@ -112,6 +114,7 @@ class ExamController extends Controller
     /**
      * @param Exam $exam
      * @return \Illuminate\Http\RedirectResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function publish(Exam $exam)
     {

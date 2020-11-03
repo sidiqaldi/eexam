@@ -52,6 +52,20 @@
 
                     <template #form>
 
+                        <div v-if="parseInt(config.time_mode) === 4" class="col-span-6 sm:col-span-4">
+                            <jet-label for="time_limit" value="Batas waktu *"/>
+                            <jet-input
+                                id="time_limit"
+                                v-model="form.time_limit"
+                                class="mt-1 block w-full"
+                                placeholder="Batas waktu (*dalam detik)"
+                                type="number"
+                                min="5"
+                                max="3600"
+                            />
+                            <jet-input-error :message="$page.errors.time_limit" class="mt-2"/>
+                        </div>
+
                         <div v-if="config.score_status === 3" class="col-span-6 sm:col-span-4">
                             <jet-label for="score" value="Nilai per Soal *"/>
                             <jet-input id="score" ref="score" v-model="form.score"
@@ -62,7 +76,6 @@
                                        type="number"/>
                             <jet-input-error :message="$page.errors.score" class="mt-2"/>
                         </div>
-
 
                         <div class="col-span-6 sm:col-span-4">
                             <jet-label for="question_type" value="Tipe soal:"/>
@@ -223,6 +236,7 @@ export default {
             answer: null,
             answerKey: null,
             form: {
+                time_limit: "",
                 score: "",
                 question_title: "",
                 question_value: "",
@@ -236,6 +250,7 @@ export default {
         this.answer = this.correct_answer ? this.correct_answer.answer : null;
         this.answerKey = this.correct_answer ? this.correct_answer.key : null;
         this.form.score = this.question.score;
+        this.form.time_limit = this.question.time_limit;
         this.form.question_title = this.question.title;
         this.form.question_value = this.question.value;
         this.form.question_type = this.question.type;

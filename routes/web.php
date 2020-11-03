@@ -69,6 +69,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function() {
             Route::post('submit/{participant}/{answer}/{option}', 'App\Http\Controllers\Participant\ExamController@submit')->name('exams.submit.post');
             Route::post('previous/{participant}/{answer}', 'App\Http\Controllers\Participant\ExamController@previous')->name('exams.previous.post');
             Route::get('recap/{participant}', 'App\Http\Controllers\Participant\ExamController@recap')->name('exams.recap');
+            Route::post('next-section/{participant}/{section}', 'App\Http\Controllers\Participant\ExamController@nextSection')->name('exams.next-section');
+            Route::post('next-question/{participant}/{answer}', 'App\Http\Controllers\Participant\ExamController@nextQuestion')->name('exams.next-question');
             Route::post('finish/{participant}', 'App\Http\Controllers\Participant\ExamController@finish')->name('exams.finish');
         });
         Route::prefix('/results')->group(function () {

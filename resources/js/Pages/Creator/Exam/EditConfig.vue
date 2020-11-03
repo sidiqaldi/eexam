@@ -39,6 +39,7 @@
                     id="time_limit"
                     v-model="form.config.time_limit"
                     class="mt-1 block w-full"
+                    required
                     placeholder="Batas waktu (dalam menit)"
                     type="number"
                 />
@@ -185,7 +186,6 @@ export default {
     },
     data() {
         return {
-            sending: false,
             form: {
                 config: this.$inertia.form({
                     visibility_status: this.config.visibility_status,
@@ -208,11 +208,10 @@ export default {
     },
     methods: {
         submitConfig() {
-            this.sending = true
             this.form.config.put(
                 '/creator/configs/' + this.config.uuid, {
                     preserveScroll: true
-                }).then(() => (this.sending = false))
+                })
         }
     }
 }

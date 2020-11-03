@@ -246,14 +246,16 @@ export default {
             }, {
                 bag: 'duplicateExam',
                 resetOnSuccess: false,
-            }),
+            })
 
             this.confirmingDuplicate = exam.uuid;
         },
         duplicateExam(uuid) {
             this.duplicate.put('/creator/exams-duplicate/' + uuid, {
                 preserveScroll: true
-            }).then(() => (this.confirmingDuplicate = false))
+            }).then(() => {
+                if (!Object.keys(this.$page.errors).length) this.confirmingDuplicate = false
+            })
         },
     }
 };

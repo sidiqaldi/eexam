@@ -20,9 +20,12 @@ class QuestionController extends Controller
     /**
      * @param Section $section
      * @return \Inertia\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function index(Section $section)
     {
+        $this->authorize('viewAny', [Question::class, $section->exam]);
+
         return Inertia::render('Creator/Question/Index', [
             'exam' => $section->exam,
             'section' => $section,
@@ -35,10 +38,11 @@ class QuestionController extends Controller
     /**
      * @param Section $section
      * @return \Inertia\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function create(Section $section)
     {
-        $this->authorize('update', $section);
+        $this->authorize('create', []);
 
         return Inertia::render('Creator/Question/Create', [
             'exam' => $section->exam,

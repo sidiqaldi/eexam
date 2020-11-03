@@ -9,6 +9,7 @@ use App\Models\Exam;
 use App\Models\Participant;
 use App\Models\Section;
 use App\Services\Exams\BasicExam;
+use App\Services\Exams\QuestionLimitExam;
 use App\Services\Exams\SectionLimitExam;
 use App\Services\Exams\TimeLimitExam;
 use Carbon\Carbon;
@@ -36,35 +37,38 @@ class ParticipantService
     {
         $config = json_decode($participant->cache_config);
 
-        if ($config->time_mode == TimeMode::TimeLimit) {
-            static::$service = new TimeLimitExam();
-        } elseif ($config->time_mode == TimeMode::PerSection) {
-            static::$service = new SectionLimitExam();
-        } else {
-            static::$service = new BasicExam();
-        }
-
+        static::$service = static::routeSwitcher($config->time_mode);
     }
 
     public static function examRouter(Exam $exam)
     {
         $config = $exam->config;
-        if ($config->time_mode == TimeMode::TimeLimit) {
-            static::$service = new TimeLimitExam();
-        } else {
-            static::$service = new BasicExam();
-        }
+
+        static::$service = static::routeSwitcher($config->time_mode);
     }
 
-    public static function getParticipantAnswers(Participant $participant)
+    public static function routeSwitcher($timeMode)
     {
-        return Answer::query()
-            ->withSectionOrder()
-            ->withOptionUuid()
-            ->where('participant_id', $participant->id)
-            ->orderBy('section_order', 'asc')
-            ->orderBy('id', 'asc')
-            ->get();
+        if ($timeMode == TimeMode::TimeLimit) {
+            return new TimeLimitExam();
+        }
+
+        if ($timeMode == TimeMode::PerSection) {
+            return new SectionLimitExam();
+        }
+
+        if ($timeMode == TimeMode::PerQuestion) {
+            return new QuestionLimitExam();
+        }
+
+        return new BasicExam();
+    }
+
+    public static function getParticipantAnswers(Participant $participant, $section = null)
+    {
+        self::onGoingRouter($participant);
+
+        return static::$service->participantAnswer($participant, $section);
     }
 
     public static function getNavigation(Participant $participant, Answer $answer, Collection $answers)
@@ -104,7 +108,6 @@ class ParticipantService
         $config = $participant->exam->config;
 
         if ($config->score_status == ScoreStatus::Global) {
-
             return $config->default_score;
         }
 
@@ -115,9 +118,23 @@ class ParticipantService
         return $answer->question->score;
     }
 
+    public static function firstQuestion(Participant $participant)
+    {
+        self::onGoingRouter($participant);
+
+        return static::$service->firstQuestion($participant);
+    }
+
+    public static function finishSection(Participant $participant, Section $section, Answer $answer)
+    {
+        self::onGoingRouter($participant);
+
+        static::$service->endSection($participant, $section, $answer);
+    }
+
     public static function finish(Participant $participant)
     {
-        self::examRouter($participant->exam);
+        self::onGoingRouter($participant);
 
         if (!$participant->finish_at) {
 
@@ -125,5 +142,47 @@ class ParticipantService
         }
 
         return redirect()->route('participant.results.show', $participant->uuid);
+    }
+
+    public static function globalTimeLimit($participant, $config)
+    {
+        return $config->time_mode !== TimeMode::NoLimit ? Carbon::now()->diffInSeconds(
+                $participant->created_at->addSeconds($config->time_limit * 60), false
+            ) * 1000 : 0;
+    }
+
+    public static function sectionTimeLimit($config, $section, $answer)
+    {
+        if ($config->time_mode === TimeMode::PerSection) {
+            if ($answer->start_at == null) {
+                self::onGoingRouter($answer->participant);
+
+                static::$service->startSection($answer->participant, $section, $answer);
+            }
+
+            return Carbon::now()->diffInSeconds(
+                $answer->start_at->addSeconds($section->time_limit * 60), false
+            ) * 1000;
+        }
+
+        return 0;
+    }
+
+    public static function questionTimeLimit($config, $section, $answer)
+    {
+        if ($config->time_mode === TimeMode::PerQuestion) {
+            if ($answer->start_at == null) {
+                self::onGoingRouter($answer->participant);
+                static::$service->startSection($answer->participant, $section, $answer);
+
+                $answer = Answer::query()->find($answer->id);
+            }
+
+            return Carbon::now()->diffInSeconds(
+                    $answer->start_at->addSeconds($answer->question->time_limit), false
+                ) * 1000;
+        }
+
+        return 0;
     }
 }

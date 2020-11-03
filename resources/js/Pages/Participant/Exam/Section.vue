@@ -8,7 +8,7 @@
             <vue-countdown v-if="config.data.time_mode == 2" :time="time_limit" tag="p" @end="forceFinish">
                 <template
                     slot-scope="props"
-                >Time Remaining：{{ props.minutes }} minutes, {{ props.seconds }} seconds.</template>
+                >Sisa waktu：{{ props.minutes }} minutes, {{ props.seconds }} seconds.</template>
             </vue-countdown>
         </template>
 
@@ -20,7 +20,11 @@
                     <div v-html="compiledMarkdown" class="prose"></div>
                 </div>
                 <div class="row justify-content-center pt-5">
-                    <inertia-link :href="'/participant/exams/process/' + participant.data.uuid + '/' + answer.data.uuid"
+                    <inertia-link v-if="config.data.time_mode == 3" :href="'/participant/exams/process/' + participant.data.uuid + '/' + answer.data.uuid"
+                                  class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:shadow-outline-gray transition ease-in-out duration-150 ml-5"
+                                  type="submit">Mulai
+                    </inertia-link>
+                    <inertia-link v-else :href="'/participant/exams/process/' + participant.data.uuid + '/' + answer.data.uuid"
                                   class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:shadow-outline-gray transition ease-in-out duration-150 ml-5"
                                   type="submit">Mulai
                     </inertia-link>

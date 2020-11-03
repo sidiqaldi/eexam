@@ -51,6 +51,21 @@
                     </template>
 
                     <template #form>
+
+                        <div v-if="parseInt(config.time_mode) === 4" class="col-span-6 sm:col-span-4">
+                            <jet-label for="time_limit" value="Batas waktu *"/>
+                            <jet-input
+                                id="time_limit"
+                                v-model="form.time_limit"
+                                class="mt-1 block w-full"
+                                placeholder="Batas waktu (*dalam detik)"
+                                type="number"
+                                min="5"
+                                max="3600"
+                            />
+                            <jet-input-error :message="$page.errors.time_limit" class="mt-2"/>
+                        </div>
+
                         <div v-if="config.score_status === 3" class="col-span-6 sm:col-span-4">
                             <jet-label for="score" value="Nilai per Soal *"/>
                             <jet-input id="score" ref="score" v-model="form.score"
@@ -217,6 +232,7 @@ export default {
             answer: null,
             answerKey: null,
             form: this.$inertia.form({
+                time_limit: "",
                 score: 10,
                 question_title: "",
                 question_value: "",

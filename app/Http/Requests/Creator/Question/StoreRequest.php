@@ -4,8 +4,8 @@ namespace App\Http\Requests\Creator\Question;
 
 use App\Enums\CorrectStatus;
 use App\Enums\InputType;
-use App\Enums\PassingGradeStatus;
 use App\Enums\ScoreStatus;
+use App\Enums\TimeMode;
 use App\Models\Config;
 use App\Models\Question;
 use App\Rules\CorrectValue;
@@ -22,6 +22,7 @@ use Illuminate\Validation\Rule;
  * @property mixed options
  * @property mixed section
  * @property mixed score
+ * @property mixed time_limit
  */
 class StoreRequest extends FormRequest
 {
@@ -32,7 +33,7 @@ class StoreRequest extends FormRequest
      */
     public function authorize()
     {
-        return Auth::user()->can('update', $this->section);
+        return Auth::user()->can('create', [Question::class , $this->section->exam]);
     }
 
     /**
@@ -42,7 +43,16 @@ class StoreRequest extends FormRequest
      */
     public function rules()
     {
+        $timeMode = Config::where('exam_id', $this->section->exam_id)->first()->time_mode === TimeMode::PerQuestion;
+
         return [
+            'time_limit' => [
+                Rule::requiredIf($timeMode),
+                'nullable',
+                'numeric',
+                'min:5',
+                'max:3600',
+            ],
             'score' => [
                 'required',
                 'numeric',
@@ -119,6 +129,7 @@ class StoreRequest extends FormRequest
     public function dataQuestion(Section $section)
     {
         return [
+            'time_limit' => $this->time_limit,
             'score' => $this->score,
             'title' => $this->question_title,
             'value' => $this->question_value,
@@ -148,9 +159,7 @@ class StoreRequest extends FormRequest
         $config = Config::query()->where('exam_id', $this->section->exam_id)->first();
 
         if ($config->score_status !== ScoreStatus::Question) {
-            $this->merge([
-                'score' => 10,
-            ]);
+            $this->merge(['score' => 10]);
         }
 
         $options = [];
@@ -163,8 +172,6 @@ class StoreRequest extends FormRequest
             $options[] = $opt;
         }
 
-        $this->merge([
-            'options' => $options,
-        ]);
+        $this->merge(['options' => $options]);
     }
 }

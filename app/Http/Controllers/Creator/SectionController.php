@@ -17,9 +17,12 @@ class SectionController extends Controller
     /**
      * @param Exam $exam
      * @return \Inertia\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function index(Exam $exam)
     {
+        $this->authorize('viewAny', [Section::class, $exam]);
+
         return Inertia::render('Creator/Section/Index', [
             'exam' => $exam,
             'config' => $exam->config,
@@ -30,10 +33,11 @@ class SectionController extends Controller
     /**
      * @param Exam $exam
      * @return \Inertia\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function create(Exam $exam)
     {
-        $this->authorize('update', $exam);
+        $this->authorize('create', $exam);
 
         return Inertia::render('Creator/Section/Create', [
             'exam' => $exam,

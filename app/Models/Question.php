@@ -21,6 +21,7 @@ use Ramsey\Uuid\Uuid;
  * @property mixed section_id
  * @property mixed order
  * @property mixed score
+ * @property mixed user_id
  */
 class Question extends Model
 {

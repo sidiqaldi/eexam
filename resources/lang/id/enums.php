@@ -18,7 +18,7 @@ return [
         TimeMode::NoLimit => 'Tanpa Batas',
         TimeMode::TimeLimit => 'Batas Waktu',
         TimeMode::PerSection => 'Per Sesi',
-        //TimeMode::PerQuestion => 'Per Soal',
+        TimeMode::PerQuestion => 'Per Soal',
     ],
 
     QuestionOrderStatus::class => [

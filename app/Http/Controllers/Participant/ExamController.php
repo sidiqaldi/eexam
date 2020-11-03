@@ -71,6 +71,7 @@ class ExamController extends Controller
      * @param Participant $participant
      * @param Exam $exam
      * @return mixed
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function continue(Participant $participant, Exam $exam)
     {
@@ -84,6 +85,7 @@ class ExamController extends Controller
      * @param Answer $answer
      * @param Section $section
      * @return \Inertia\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function section(Participant $participant, Answer $answer, Section $section)
     {
@@ -100,45 +102,52 @@ class ExamController extends Controller
             'exam' => new ExamResource($exam),
             'participant' => new ParticipantResource($participant),
             'section' => new SectionResource($section),
-            'time_limit' => $exam->config->time_mode == TimeMode::TimeLimit ?
-                Carbon::now()->diffInSeconds(
-                    $participant->created_at->addSeconds($exam->config->time_limit * 60), false
-                ) * 1000
-                : 0,
+            'time_limit' => ParticipantService::globalTimeLimit($participant, $exam->config),
         ]);
     }
 
     /**
      * @param Participant $participant
      * @param Answer $answer
-     * @return \Inertia\Response
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector|\Inertia\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function process(Participant $participant, Answer $answer)
     {
         $this->authorize('process', $participant);
 
-        ParticipantService::validateStatus($participant);
+        $redirect = ParticipantService::validateStatus($participant, $answer->section, $answer);
+
+        if ($redirect) {
+            return redirect($redirect);
+        }
 
         $exam = $participant->exam;
 
-        $answers = ParticipantService::getParticipantAnswers($participant);
+        $section = $answer->section;
+
+        $answers = ParticipantService::getParticipantAnswers($participant, $section);
+
+        $config = $exam->config;
+
+        $question = $answer->question;
+
+        $options = $question->options;
 
         return Inertia::render('Participant/Exam/Process', [
             'answer' => function () use ($answer) {
                 return new AnswerResource(Answer::query()->withOptionUuid()->where('id', $answer->id)->first());
             },
             'answers' => AnswerResource::collection($answers),
-            'config' => new ConfigResource($exam->config),
+            'config' => new ConfigResource($config),
             'exam' => new ExamResource($exam),
-            'options' => OptionResource::collection($answer->question->options),
+            'options' => OptionResource::collection($options),
             'participant' => new ParticipantResource($participant),
-            'question' => new QuestionResource($answer->question),
-            'section' => new SectionResource($answer->section),
-            'time_limit' => $exam->config->time_mode == TimeMode::TimeLimit ?
-                Carbon::now()->diffInSeconds(
-                    $participant->created_at->addSeconds($exam->config->time_limit * 60), false
-                ) * 1000
-                : 0,
+            'question' => new QuestionResource($question),
+            'section' => new SectionResource($section),
+            'time_limit' => ParticipantService::globalTimeLimit($participant, $config),
+            'section_limit' => ParticipantService::sectionTimeLimit($config, $section, $answer),
+            'question_limit' => ParticipantService::questionTimeLimit($config, $section, $answer),
         ]);
     }
 
@@ -147,6 +156,7 @@ class ExamController extends Controller
      * @param Answer $answer
      * @param Option $option
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function submit(Participant $participant, Answer $answer, Option $option)
     {
@@ -169,6 +179,7 @@ class ExamController extends Controller
      * @param Participant $participant
      * @param Answer $answer
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function previous(Participant $participant, Answer $answer)
     {
@@ -182,7 +193,59 @@ class ExamController extends Controller
 
     /**
      * @param Participant $participant
+     * @param Section $section
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function nextSection(Participant $participant, Section $section)
+    {
+        $this->authorize('process', $participant);
+
+        ParticipantService::finishSection($participant, $section, new Answer);
+
+        if (ParticipantService::firstQuestion($participant)) {
+            return ParticipantService::join($participant->exam);
+        }
+
+        return redirect()->route('participant.exams.recap', $participant->uuid);
+    }
+
+    /**
+     * @param Participant $participant
+     * @param Answer $answer
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function nextQuestion(Participant $participant, Answer $answer)
+    {
+        $this->authorize('process', $participant);
+
+        ParticipantService::finishSection($participant, new Section, $answer);
+
+        $nextQuestion = ParticipantService::firstQuestion($participant);
+
+        if ($nextQuestion) {
+            if ($nextQuestion->section_id == $answer->section_id) {
+                return redirect()->route('participant.exams.process', [
+                    'participant' => $participant->uuid,
+                    'answer' => $nextQuestion->uuid
+                ]);
+            }
+
+            return redirect()->route('participant.exams.section', [
+                'participant' => $participant->uuid,
+                'answer' => $nextQuestion->uuid,
+                'section' => $nextQuestion->section->uuid,
+            ]);
+        }
+
+        return redirect()->route('participant.exams.recap', $participant->uuid);
+    }
+
+    /**
+     * @param Participant $participant
      * @return \Inertia\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function recap(Participant $participant)
     {

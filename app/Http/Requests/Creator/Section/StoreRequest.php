@@ -7,6 +7,7 @@ use App\Enums\ScoreStatus;
 use App\Enums\TimeMode;
 use App\Models\Config;
 use App\Models\Exam;
+use App\Models\Section;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -23,7 +24,7 @@ class StoreRequest extends FormRequest
      */
     public function authorize()
     {
-        return Auth::user()->can('update', $this->exam);
+        return Auth::user()->can('create', [Section::class , $this->exam]);
     }
 
     /**

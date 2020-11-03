@@ -38,6 +38,8 @@
                                 class="mt-1 block w-full"
                                 placeholder="Batas waktu (dalam menit)"
                                 type="number"
+                                min="5"
+                                max="360"
                             />
                             <jet-input-error :message="$page.errors.time_limit" class="mt-2"/>
                         </div>
