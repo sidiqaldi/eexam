@@ -42,7 +42,7 @@ class QuestionController extends Controller
      */
     public function create(Section $section)
     {
-        $this->authorize('create', []);
+        $this->authorize('create', [Question::class, $section->exam]);
 
         return Inertia::render('Creator/Question/Create', [
             'exam' => $section->exam,

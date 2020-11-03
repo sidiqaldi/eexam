@@ -103,7 +103,7 @@ export default {
         },
         submit() {
             this.sending = true
-            this.$inertia.post('/creator/exams', this.form).then(() => this.sending = false)
+            this.$inertia.post('/creator/exams', this.form, { preserveScroll: true }).then(() => this.sending = false)
         }
     }
 };

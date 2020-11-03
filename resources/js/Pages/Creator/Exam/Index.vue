@@ -57,7 +57,7 @@
                                             <icon class="inline" name="pencil"/>
                                             Edit
                                         </inertia-link>
-                                        <inertia-link
+                                        <inertia-link v-if="exam.status_id === 1"
                                             :href="'/creator/sections/' + exam.uuid"
                                             class="block mx-1 items-center justify-center px-2 py-1 my-1 border border-transparent rounded-md bg-white hover:bg-gray-300"
                                         >
