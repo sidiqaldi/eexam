@@ -28,12 +28,32 @@ class BasicExam
             return redirect()->back()->withErrors(['join' => [__('validation.participate')]]);
         }
 
+        $participant = $this->prepareParticipant($exam);
+
+        $this->prepareAnswerSheet($participant, $exam);
+
+        RecapService::init($participant);
+
+        return redirect()->route('participant.exams.section', [
+            'participant' => $participant->uuid,
+            'answer' => $this->firstQuestion($participant)->uuid,
+            'section' => $this->currentSection($participant)->uuid,
+        ]);
+    }
+
+    public function prepareParticipant($exam)
+    {
         $participant = Participant::query()->create([
             'user_id' => Auth::id(),
             'exam_id' => $exam->id,
             'random_key' => Auth::id(),
         ]);
 
+        return Participant::find($participant->getAttribute('id'));
+    }
+
+    public function prepareAnswerSheet($participant, $exam)
+    {
         foreach ($exam->sections as $section) {
             foreach ($section->questions as $question) {
                 Answer::query()->create([
@@ -44,16 +64,6 @@ class BasicExam
                 ]);
             }
         }
-
-        $participant = Participant::find($participant->getAttribute('id'));
-
-        RecapService::init($participant);
-
-        return redirect()->route('participant.exams.section', [
-            'participant' => $participant->uuid,
-            'answer' => $this->firstQuestion($participant)->uuid,
-            'section' => $this->currentSection($participant)->uuid,
-        ]);
     }
 
     /**
@@ -119,9 +129,14 @@ class BasicExam
         return true;
     }
 
-    public function validateStatus(Participant $participant, $section, $answer)
+    public function isInvalidStatus(Participant $participant, $section, $answer)
     {
-        return true;
+        return false;
+    }
+
+    public function passTimeLimit($now, $startAt, $timeLimit)
+    {
+        return $now->gt($startAt->addMinutes($timeLimit));
     }
 
     public function startSection($participant, $section, $answer)

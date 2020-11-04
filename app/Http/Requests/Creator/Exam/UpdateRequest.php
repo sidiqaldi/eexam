@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Creator\Exam;
 
-use App\Exam;
+use App\Enums\VisibilityStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -34,7 +34,11 @@ class UpdateRequest extends FormRequest
                 'min:6',
                 'max:50',
                 Rule::unique('exams')->ignore($this->route('exam')->id)
-            ]
+            ],
+            'visibility_status' => [
+                'required',
+                Rule::in(VisibilityStatus::getValues())
+            ],
         ];
     }
 
@@ -47,6 +51,7 @@ class UpdateRequest extends FormRequest
             'name' => $this->input('name'),
             'description' => $this->input('description'),
             'code' => $this->input('code'),
+            'visibility_status' => $this->input('visibility_status'),
         ];
     }
 }

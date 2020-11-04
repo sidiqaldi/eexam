@@ -88,7 +88,9 @@ class ExamController extends Controller
     {
         $this->authorize('process', $participant);
 
-        ParticipantService::validateStatus($participant, $section, $answer);
+        if ($redirect = ParticipantService::isInvalidStatus($participant, $section, $answer)) {
+            return redirect($redirect);
+        }
 
         $exam = $participant->exam;
 
@@ -113,9 +115,7 @@ class ExamController extends Controller
     {
         $this->authorize('process', $participant);
 
-        $redirect = ParticipantService::validateStatus($participant, $answer->section, $answer);
-
-        if ($redirect) {
+        if ($redirect = ParticipantService::isInvalidStatus($participant, $answer->section, $answer)) {
             return redirect($redirect);
         }
 
@@ -159,7 +159,7 @@ class ExamController extends Controller
     {
         $this->authorize('process', $participant);
 
-        ParticipantService::validateStatus($participant);
+        ParticipantService::isInvalidStatus($participant);
 
         $answer->option_id = $option->id;
         $answer->is_correct = $option->correct_id;

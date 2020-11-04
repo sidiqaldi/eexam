@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Creator;
 
 use App\Models\Config;
 use App\Enums\ExamStatus;
+use App\Enums\VisibilityStatus;
 use App\Models\Exam;
 use App\Filters\ExamFilter;
 use App\Http\Controllers\Controller;
@@ -47,7 +48,9 @@ class ExamController extends Controller
     {
         $this->authorize('create', Exam::class);
 
-        return Inertia::render('Creator/Exam/Create');
+        $data['visibility_status'] = VisibilityStatus::asSelectArray();
+
+        return Inertia::render('Creator/Exam/Create', $data);
     }
 
     /**

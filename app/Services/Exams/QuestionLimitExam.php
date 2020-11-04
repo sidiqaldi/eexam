@@ -21,11 +21,11 @@ class QuestionLimitExam extends BasicExam
 
         $now = Carbon::now();
 
-        if ($config->time_mode == TimeMode::PerQuestion) {
-            if ($now->gt($participant->created_at->addMinutes($config->time_limit))) {
-                $this->markAsFinish($participant, $participant->created_at->addMinutes($config->time_limit));
-                return false;
-            }
+        if ($this->passTimeLimit($now, $participant->created_at, $config->time_limit)) {
+
+            $this->markAsFinish($participant, $participant->created_at->addMinutes($config->time_limit));
+
+            return false;
         }
 
         return true;
@@ -59,44 +59,43 @@ class QuestionLimitExam extends BasicExam
             ->get();
     }
 
-    public function validateStatus(Participant $participant, $section, $answer)
+    public function isInvalidStatus(Participant $participant, $section, $answer)
     {
-        if ($answer) {
-            $this->startSection($participant, $section, $answer);
-        }
-
-        $config = json_decode($participant->cache_config);
-
         $now = Carbon::now();
 
         if ($answer) {
+
+            $this->startSection($participant, $section, $answer);
+
             $answer = Answer::query()->find($answer->id);
 
             if ($answer->finish_at) {
 
-                $this->endSection($participant, $section, $answer);
-
                 $nextAnswer = $this->firstQuestion($participant);
 
-                $currentSection = $nextAnswer ? $this->currentSection($participant) : null;
+                $currentSection = $nextAnswer ? $nextAnswer->section : null;
 
                 return $this->goToNextQuestion($participant, $currentSection, $nextAnswer);
             }
 
-            if ($now->gt($answer->start_at->addSeconds($section->time_limit, false))) {
+            if ($this->passTimeLimit($now, $answer->start_at, $section->time_limit)) {
 
                 $this->endSection($participant, $section, $answer);
 
                 $nextAnswer = $this->firstQuestion($participant);
 
-                $currentSection = $nextAnswer ? $this->currentSection($participant) : null;
+                $currentSection = $nextAnswer ? $nextAnswer->section : null;
 
                 return $this->goToNextQuestion($participant, $currentSection, $nextAnswer);
             }
         }
 
-        if ($now->gt($participant->created_at->addMinutes($config->time_limit))) {
+        $config = json_decode($participant->cache_config);
+
+        if ($this->passTimeLimit($now, $participant->created_at, $config->time_limit)) {
+
             $this->markAsFinish($participant, $participant->created_at->addMinutes($config->time_limit));
+
             return abort(Response::HTTP_UNAUTHORIZED);
         }
 

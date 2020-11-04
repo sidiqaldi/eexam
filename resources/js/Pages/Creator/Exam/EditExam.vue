@@ -42,6 +42,18 @@
                 </div>
                 <jet-input-error :message="$page.errors.code" class="mt-2"/>
             </div>
+
+            <div class="col-span-6 sm:col-span-4">
+                <jet-label for="visibility-mode" value="Visibilitas *"/>
+                <input-basic-select id="visibility-mode" ref="visibility-mode" v-model="form.exam.visibility_status"
+                                    autocomplete="visibility-mode"
+                                    class="mt-1 block w-full"
+                                    type="text">
+                    <option v-for="(value, key) in visibility_status" :key="key" :value="key">{{ value }}</option>
+                </input-basic-select>
+                <jet-input-error :message="$page.errors.visibility_status" class="mt-2"/>
+            </div>
+
         </template>
 
         <template #actions>
@@ -59,6 +71,7 @@
 
 <script>
 import Icon from '@/Shared/Icon'
+import InputBasicSelect from '@/Shared/InputBasicSelect'
 import JetActionMessage from '@/Jetstream/ActionMessage'
 import JetButton from '@/Jetstream/Button'
 import JetDangerButton from '@/Jetstream/DangerButton'
@@ -68,9 +81,11 @@ import JetInputError from '@/Jetstream/InputError'
 import JetLabel from '@/Jetstream/Label'
 import JetSectionBorder from '@/Jetstream/SectionBorder'
 
+
 export default {
     components: {
         Icon,
+        InputBasicSelect,
         JetFormSection,
         JetInput,
         JetLabel,
@@ -82,6 +97,7 @@ export default {
     },
     props: {
         exam: Object,
+        visibility_status: Object,
     },
     data() {
         return {
@@ -90,7 +106,8 @@ export default {
                 exam: this.$inertia.form({
                     name: this.exam.name,
                     description: this.exam.description,
-                    code: this.exam.code
+                    code: this.exam.code,
+                    visibility_status: this.exam.visibility_status,
                 }, {
                     bag: 'updateExam',
                     resetOnSuccess: false,

@@ -30,7 +30,7 @@ class Exam extends Model
 {
     use Filterable, HasOwner;
 
-    protected $fillable = ['user_id', 'name', 'description', 'code'];
+    protected $fillable = ['user_id', 'name', 'description', 'code', 'visibility_status'];
 
     /**
      * Setup model event hooks

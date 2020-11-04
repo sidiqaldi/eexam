@@ -9,11 +9,9 @@ use App\Enums\RankingStatus;
 use App\Enums\ResultStatus;
 use App\Enums\ScoreStatus;
 use App\Enums\TimeMode;
-use App\Enums\VisibilityStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\RequiredIf;
 
 /**
  * @property mixed time_limit
@@ -49,10 +47,6 @@ class UpdateRequest extends FormRequest
         $request = $this;
 
         return [
-            'visibility_status' => [
-                'required',
-                Rule::in(VisibilityStatus::getValues())
-            ],
             'time_mode' => [
                 'required',
                 Rule::in(TimeMode::getValues())

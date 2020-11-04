@@ -26,11 +26,11 @@ class ParticipantService
         return static::$service->join($exam);
     }
 
-    public static function validateStatus(Participant $participant, $section = null, $answer = null)
+    public static function isInvalidStatus(Participant $participant, $section = null, $answer = null)
     {
         self::onGoingRouter($participant);
 
-        return static::$service->validateStatus($participant, $section, $answer);
+        return static::$service->isInvalidStatus($participant, $section, $answer);
     }
 
     public static function onGoingRouter(Participant $participant)

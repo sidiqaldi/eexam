@@ -14,7 +14,6 @@ class Config extends Model
     protected $fillable = [
         'user_id',
         'exam_id',
-        'visibility_status',
         'time_limit',
         'time_mode',
         'question_order',

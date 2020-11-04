@@ -20,6 +20,7 @@ class ExamResource extends JsonResource
             'description' => $this->description,
             'code' => $this->code,
             'status' => $this->status,
+            'status_id' => $this->status_id,
         ];
     }
 }

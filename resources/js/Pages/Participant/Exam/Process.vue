@@ -109,7 +109,7 @@
                                     v-bind:class="{ 'bg-green-300' : answerItem.filled && !isActiveAnswer(answerItem.uuid) ,'bg-gray-300' : isActiveAnswer(answerItem.uuid)}">
                                     {{ index + 1 }}
                                 </inertia-link>
-                                <div class="flex" v-if="config.data.time_mode !== 4">
+                                <div class="flex" v-if="config.data.time_mode === 3">
                                     <button
                                         @click="finishSectionConfirm = true"
                                         class="flex m-1 border py-2 px-4">Selesai Sesi ini

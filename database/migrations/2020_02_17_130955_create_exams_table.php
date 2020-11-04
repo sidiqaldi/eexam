@@ -20,6 +20,7 @@ class CreateExamsTable extends Migration
             $table->string('name', 150);
             $table->string('description', 250);
             $table->string('code', 100);
+            $table->unsignedSmallInteger('visibility_status');
             $table->unsignedSmallInteger('status_id')->default(\App\Enums\ExamStatus::Draft);
             $table->timestamps();
 

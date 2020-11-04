@@ -52,6 +52,18 @@
                             </div>
                             <jet-input-error :message="$page.errors.code" class="mt-2"/>
                         </div>
+
+                        <div class="col-span-6 sm:col-span-4">
+                            <jet-label for="visibility-mode" value="Visibilitas *"/>
+                            <input-basic-select id="visibility-mode" ref="visibility-mode" v-model="form.visibility_status"
+                                                autocomplete="visibility-mode"
+                                                class="mt-1 block w-full"
+                                                type="text">
+                                <option v-for="(value, key) in visibility_status" :key="key" :value="key">{{ value }}</option>
+                            </input-basic-select>
+                            <jet-input-error :message="$page.errors.visibility_status" class="mt-2"/>
+                        </div>
+
                     </template>
 
                     <template #actions>
@@ -66,6 +78,7 @@
 </template>
 
 <script>
+import InputBasicSelect from '@/Shared/InputBasicSelect'
 import Layout from "@/Layouts/AppLayout";
 import JetButton from '@/Jetstream/Button'
 import JetFormSection from '@/Jetstream/FormSection'
@@ -73,8 +86,10 @@ import JetInput from '@/Jetstream/Input'
 import JetInputError from '@/Jetstream/InputError'
 import JetLabel from '@/Jetstream/Label'
 
+
 export default {
     components: {
+        InputBasicSelect,
         Layout,
         JetButton,
         JetFormSection,
@@ -83,7 +98,8 @@ export default {
         JetLabel,
     },
     props: {
-        random_question: Object
+        random_question: Object,
+        visibility_status: Object
     },
     data() {
         return {
@@ -92,6 +108,7 @@ export default {
                 name: '',
                 description: '',
                 code: '',
+                visibility_status: 1,
             }
         };
     },

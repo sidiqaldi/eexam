@@ -11,16 +11,6 @@
         </template>
 
         <template #form>
-             <div class="col-span-6 sm:col-span-4">
-                <jet-label for="visibility-mode" value="Visibilitas *"/>
-                <input-basic-select id="visibility-mode" ref="visibility-mode" v-model="form.config.visibility_status"
-                                    autocomplete="visibility-mode"
-                                    class="mt-1 block w-full"
-                                    type="text">
-                    <option v-for="(value, key) in visibility_status" :key="key" :value="key">{{ value }}</option>
-                </input-basic-select>
-                <jet-input-error :message="$page.errors.visibility_status" class="mt-2"/>
-            </div>
 
             <div class="col-span-6 sm:col-span-4">
                 <jet-label for="time-mode" value="Pengaturan waktu *"/>
@@ -173,7 +163,6 @@ export default {
         JetSectionBorder,
     },
     props: {
-        visibility_status: Object,
         question_order: Object,
         answer_order: Object,
         ranking_status: Object,
@@ -188,7 +177,6 @@ export default {
         return {
             form: {
                 config: this.$inertia.form({
-                    visibility_status: this.config.visibility_status,
                     question_order: this.config.question_order,
                     answer_order: this.config.answer_order,
                     time_mode: this.config.time_mode,

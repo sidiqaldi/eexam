@@ -14,6 +14,7 @@ class SectionLimitExam extends BasicExam
     public function onGoing(Participant $participant)
     {
         if (!empty($participant->finish_at)) {
+
             return false;
         }
 
@@ -21,11 +22,11 @@ class SectionLimitExam extends BasicExam
 
         $now = Carbon::now();
 
-        if ($config->time_mode == TimeMode::PerSection) {
-            if ($now->gt($participant->created_at->addMinutes($config->time_limit))) {
-                $this->markAsFinish($participant, $participant->created_at->addMinutes($config->time_limit));
-                return false;
-            }
+        if ($this->passTimeLimit($now, $participant->created_at, $config->time_limit)) {
+
+            $this->markAsFinish($participant, $participant->created_at->addMinutes($config->time_limit));
+
+            return false;
         }
 
         return true;
@@ -40,23 +41,11 @@ class SectionLimitExam extends BasicExam
         return Answer::query()
                 ->withSectionOrder()
                 ->where('participant_id', $participant->id)
-                ->where('option_id', NULL)
-                ->where('start_at', NULL)
                 ->where('finish_at', NULL)
                 ->orderBy('section_order', 'asc')
                 ->orderBy('id', 'asc')
                 ->first()
-            ?? (
-                Answer::query()
-                    ->withSectionOrder()
-                    ->where('participant_id', $participant->id)
-                    ->where('finish_at', NULL)
-                    ->orderBy('section_order', 'asc')
-                    ->orderBy('id', 'desc')
-                    ->first()
-                ??
-                null
-            );
+            ?? null;
     }
 
     public function participantAnswer($participant, $section = null)
@@ -73,7 +62,7 @@ class SectionLimitExam extends BasicExam
             ->get();
     }
 
-    public function validateStatus(Participant $participant, $section, $answer)
+    public function isInvalidStatus(Participant $participant, $section, $answer)
     {
         if ($section) {
             $this->startSection($participant, $section, $answer);
@@ -85,27 +74,57 @@ class SectionLimitExam extends BasicExam
 
         if ($answer) {
             $answer = Answer::query()->find($answer->id);
-            if ($now->gt($answer->start_at->addMinutes($section->time_limit))) {
+
+            if ($this->passTimeLimit($now, $answer->start_at, $section->time_limit)) {
 
                 $this->endSection($participant, $section, $answer);
 
-                $nextAnswer = $this->firstQuestion($participant);
-                $nextSection = $nextAnswer ? $this->currentSection($participant) : null;
+                $nextAnswer = $this->nextSectionFirstQuestion($participant);
+
+                $nextSection = $nextAnswer ? $nextAnswer->section : null;
 
                 return $this->goToNextSection($participant, $nextSection, $nextAnswer);
             }
         }
 
-        if ($now->gt($participant->created_at->addMinutes($config->time_limit))) {
+        if ($this->passTimeLimit($now, $participant->created_at, $config->time_limit)) {
+
             $this->markAsFinish($participant, $participant->created_at->addMinutes($config->time_limit));
+
             return abort(Response::HTTP_UNAUTHORIZED);
         }
+    }
+
+    public function nextSectionFirstQuestion(Participant $participant)
+    {
+        return Answer::query()
+                ->withSectionOrder()
+                ->where('participant_id', $participant->id)
+                ->where('option_id', NULL)
+                ->where('start_at', NULL)
+                ->where('finish_at', NULL)
+                ->orderBy('section_order', 'asc')
+                ->orderBy('id', 'asc')
+                ->first()
+            ?? (
+                Answer::query()
+                    ->withSectionOrder()
+                    ->where('participant_id', $participant->id)
+                    ->where('finish_at', NULL)
+                    ->orderBy('section_order', 'asc')
+                    ->orderBy('id', 'asc')
+                    ->first()
+                ??
+                null
+            );
     }
 
     public function goToNextSection($participant, $section, $answer)
     {
         if ($answer == null) {
+
             $this->markAsFinish($participant, Carbon::now());
+
             return redirect()->route('participant.exams.recap', $participant->uuid);
         }
 

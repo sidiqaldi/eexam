@@ -20,27 +20,27 @@ class TimeLimitExam extends BasicExam
 
         $now = Carbon::now();
 
-        if ($config->time_mode == TimeMode::TimeLimit) {
-            if ($now->gt($participant->created_at->addMinutes($config->time_limit))) {
-                $this->markAsFinish($participant, $participant->created_at->addMinutes($config->time_limit));
-                return false;
-            }
+        if ($this->passTimeLimit($now, $participant->created_at, $config->time_limit)) {
+
+            $this->markAsFinish($participant, $participant->created_at->addMinutes($config->time_limit));
+
+            return false;
         }
 
         return true;
     }
 
-    public function validateStatus(Participant $participant, $section, $answer)
+    public function isInvalidStatus(Participant $participant, $section, $answer)
     {
         $config = json_decode($participant->cache_config);
 
         $now = Carbon::now();
 
-        if ($config->time_mode == TimeMode::TimeLimit) {
-            if ($now->gt($participant->created_at->addMinutes($config->time_limit))) {
-                $this->markAsFinish($participant, $participant->created_at->addMinutes($config->time_limit));
-                return abort(Response::HTTP_UNAUTHORIZED);
-            }
+        if ($this->passTimeLimit($now, $participant->created_at, $config->time_limit)) {
+
+            $this->markAsFinish($participant, $participant->created_at->addMinutes($config->time_limit));
+
+            return abort(Response::HTTP_UNAUTHORIZED);
         }
     }
 }

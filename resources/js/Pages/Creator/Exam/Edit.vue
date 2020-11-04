@@ -35,12 +35,11 @@
         <div>
             <div class="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
 
-                <edit-exam :exam="exam"/>
+                <edit-exam :exam="exam" :visibility_status="visibility_status" />
 
                 <jet-section-border/>
 
-                <edit-config class="md:grid md:grid-cols-3 md:gap-6 mt-10 sm:mt-0" :answer_order="answer_order"
-                             :visibility_status="visibility_status"
+                <edit-config v-if="exam.status_id === 1" class="md:grid md:grid-cols-3 md:gap-6 mt-10 sm:mt-0" :answer_order="answer_order"
                              :config="config"
                              :exam="exam"
                              :question_order="question_order"
