@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Creator;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Creator\Result\ShowExamRequest;
-use App\Http\Requests\Creator\Result\ShowParticipantRequest;
 use App\Http\Resources\ExamCreatorResultResource;
 use App\Http\Resources\ExamResource;
 use App\Http\Resources\ParticipantCreatorReportResource;

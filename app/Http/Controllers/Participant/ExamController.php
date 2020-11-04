@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\Participant;
 
-use App\Enums\TimeMode;
-use App\Http\Requests\Participant\Exam\ProcessRequest;
 use App\Http\Resources\QuestionResource;
 use App\Http\Resources\SectionResource;
 use App\Enums\CorrectStatus;
@@ -20,7 +18,6 @@ use App\Models\Option;
 use App\Models\Participant;
 use App\Models\Section;
 use App\Services\ParticipantService;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 

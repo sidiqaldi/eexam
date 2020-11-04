@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Participant;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Participant\Result\OwnerRequest;
 use App\Http\Resources\ParticipantReportResource;
 use App\Models\Participant;
 use App\Models\User;
@@ -28,12 +27,13 @@ class ResultController extends Controller
     }
 
     /**
-     * @param OwnerRequest $request
      * @param Participant $participant
      * @return \Inertia\Response
      */
-    public function show(OwnerRequest $request, Participant $participant)
+    public function show(Participant $participant)
     {
+        $this->authorize('owner', $participant);
+
         return Inertia::render('Participant/Result/Show', [
             'report' => RecapService::participantReport($participant)
         ]);

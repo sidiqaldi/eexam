@@ -11,7 +11,7 @@ class ParticipantPolicy
     use HandlesAuthorization;
 
     /**
-     * Determine whether the user can view the model.
+     * Determine whether the user can process the model.
      *
      * @param  \App\Models\User  $user
      * @param  \App\Models\Participant  $participant
@@ -20,5 +20,17 @@ class ParticipantPolicy
     public function process(User $user, Participant $participant)
     {
         return $user->id === $participant->user_id && $participant->finish_at == null;
+    }
+
+    /**
+     * Determine whether the user owner the model.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Participant  $participant
+     * @return mixed
+     */
+    public function owner(User $user, Participant $participant)
+    {
+        return $user->id === $participant->user_id && $participant->finish_at;
     }
 }

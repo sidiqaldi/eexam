@@ -6,8 +6,6 @@ use App\Enums\InputType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Creator\Question\OrderRequest;
 use App\Http\Requests\Creator\Question\StoreRequest;
-use App\Http\Requests\Creator\Question\DestroyRequest;
-use App\Http\Requests\Creator\Question\EditRequest;
 use App\Http\Requests\Creator\Question\UpdateRequest;
 use App\Models\Question;
 use App\Models\Section;
