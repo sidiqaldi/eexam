@@ -11,6 +11,11 @@ class PublishExamService
 {
     private $errors;
     private $hasError;
+    public $errorLocations = [];
+
+    const Config = 'config';
+    const Section = 'section';
+    const Question = 'question';
 
     public function __construct($errors)
     {
@@ -45,14 +50,147 @@ class PublishExamService
 
         $sectionId = $sections->pluck('id');
 
-        foreach ($sections as $section) {
-            if (!$section->questions()->count()) {
-                return new self(['exam' => [__('validation.no_questions')]]);
-            }
+        if (!static::isEachSectionHasQuestions($sections)) {
+            return new self(['exam' => [__('validation.no_questions')]]);
         }
 
         $config = $exam->config;
 
+        $totalScore = static::getTotalScoreByConfig($sectionId, $sections, $config);
+
+        if (!static::isTotalScoreMatchThePassingGrade($totalScore, $sections, $config)) {
+            return new self(['exam' => [__('validation.need_question')]]);
+        }
+
+        if ($config->time_mode == TimeMode::PerSection) {
+            if (static::isEmptySectionTimeLimitExist($exam)) {
+                return new self(['exam' => [__('validation.section_time_limit_empty')]]);
+            }
+
+            if ($sections->sum('time_limit') > $config->time_limit) {
+                return new self(['exam' => [__('validation.section_time_limit')]]);
+            }
+        }
+
+        if ($config->time_mode == TimeMode::PerQuestion) {
+            if (static::isEmptyQuestionTimeLimitExist($sectionId)) {
+                return new self(['exam' => [__('validation.question_time_limit_empty')]]);
+            }
+
+            if (Question::whereIn('section_id', $sectionId)->sum('time_limit') / 60 > $config->time_limit) {
+                return new self(['exam' => [__('validation.question_time_limit')]]);
+            }
+        }
+
+        return new self(null);
+    }
+
+    public static function validateWithoutBreak(Exam $exam)
+    {
+        $validation = new self([]);
+
+        if (!$exam->sections->count()) {
+
+            $validation->errors['section'][] = __('validation.no_sections');
+            $validation->errorLocations['section'] = true;
+        }
+
+        $sections = $exam->sections;
+
+        $sectionId = $sections->pluck('id');
+
+        if (!static::isEachSectionHasQuestions($sections)) {
+
+            $validation->errors['question'][] = __('validation.no_question');
+            $validation->errorLocations['question'] = true;
+        }
+
+        $config = $exam->config;
+
+        $totalScore = static::getTotalScoreByConfig($sectionId, $sections, $config);
+
+        if (!static::isTotalScoreMatchThePassingGrade($totalScore, $sections, $config)) {
+
+            $validation->errors['question'][] = __('validation.need_question');
+            $validation->errorLocations['question'] = true;
+        }
+
+        if ($config->time_mode == TimeMode::PerSection) {
+            if (static::isEmptySectionTimeLimitExist($exam)) {
+
+                $validation->errors['section'][] = __('validation.section_time_limit_empty');
+                $validation->errorLocations['section'] = true;
+            }
+
+            if ($sections->sum('time_limit') > $config->time_limit) {
+
+                $validation->errors['config'][] = __('validation.section_time_limit');
+                $validation->errorLocations['config'] = true;
+            }
+        }
+
+        if ($config->time_mode == TimeMode::PerQuestion) {
+            if (static::isEmptyQuestionTimeLimitExist($sectionId)) {
+
+                $validation->errors['question'][] = __('validation.question_time_limit_empty');
+                $validation->errorLocations['question'] = true;
+            }
+
+            if (Question::whereIn('section_id', $sectionId)->sum('time_limit') / 60 > $config->time_limit) {
+
+                $validation->errors['config'][] = __('validation.question_time_limit');
+                $validation->errorLocations['config'] = true;
+            }
+        }
+
+        return $validation;
+    }
+
+    public static function getErrorLocations(Exam $exam)
+    {
+        $validation = static::validateWithoutBreak($exam);
+        return (object) $validation->errorLocations;
+    }
+
+    private static function isEachSectionHasQuestions($sections)
+    {
+        foreach ($sections as $section) {
+            if (!$section->questions()->count()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static function isTotalScoreMatchThePassingGrade($totalScore, $sections, $config)
+    {
+        if ($config->passing_grade_status == PassingGradeStatus::Global) {
+            if ($config->default_passing_grade > $totalScore) {
+                return false;
+            };
+            return true;
+        }
+
+        foreach ($sections as $section) {
+            if ($config->score_status == ScoreStatus::Global) {
+                if ($section->passing_grade > $section->questions()->count() * $config->default_score) {
+                    return false;
+                }
+            } elseif ($config->score_status == ScoreStatus::Section) {
+                if ($section->passing_grade > $section->questions()->count() * $section->score_per_question) {
+                    return false;
+                }
+            } else {
+                if ($section->passing_grade > $section->questions()->sum('score')) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static function getTotalScoreByConfig($sectionId, $sections, $config)
+    {
         $totalScore = 0;
 
         if ($config->score_status == ScoreStatus::Global) {
@@ -65,57 +203,16 @@ class PublishExamService
             $totalScore = Question::query()->whereIn('section_id', $sectionId)->sum('score');
         }
 
-        if ($config->passing_grade_status == PassingGradeStatus::Global) {
-            if ($config->default_passing_grade > $totalScore) {
-                return new self(['exam' => [__('validation.need_question')]]);
-            };
-        } else {
-            foreach ($sections as $section) {
+        return $totalScore;
+    }
 
-                if ($config->score_status == ScoreStatus::Global) {
-                    if ($section->passing_grade > $section->questions()->count() * $config->default_score) {
-                        return new self(['exam' => [__('validation.need_question')]]);
-                    }
-                } elseif ($config->score_status == ScoreStatus::Section) {
-                    if ($section->passing_grade > $section->questions()->count() * $section->score_per_question) {
-                        return new self(['exam' => [__('validation.need_question')]]);
-                    }
-                } else {
-                    if ($section->passing_grade > $section->questions()->sum('score')) {
-                        return new self(['exam' => [__('validation.need_question')]]);
-                    }
-                }
-            }
-        }
+    private static function isEmptySectionTimeLimitExist($exam)
+    {
+        return $exam->sections()->where('time_limit', NUll)->orWhere('time_limit', 0)->count();
+    }
 
-        if ($config->time_mode == TimeMode::PerSection) {
-            if ($exam->sections()
-                ->where('time_limit', NUll)
-                ->orWhere('time_limit', 0)
-                ->count()
-            ) {
-                return new self(['exam' => [__('validation.section_time_limit_empty')]]);
-            }
-
-            if ($sections->sum('time_limit') > $config->time_limit) {
-                return new self(['exam' => [__('validation.section_time_limit')]]);
-            }
-        }
-
-        if ($config->time_mode == TimeMode::PerQuestion) {
-            if (Question::whereIn('section_id', $sectionId)
-                ->where('time_limit', NUll)
-                ->orWhere('time_limit', 0)
-                ->count()
-            ) {
-                return new self(['exam' => [__('validation.question_time_limit_empty')]]);
-            }
-
-             if (Question::whereIn('section_id', $sectionId)->sum('time_limit') / 60 > $config->time_limit) {
-                 return new self(['exam' => [__('validation.question_time_limit')]]);
-             }
-         }
-
-        return new self(null);
+    private static function isEmptyQuestionTimeLimitExist($sectionId)
+    {
+        return Question::whereIn('section_id', $sectionId)->where('time_limit', NUll)->orWhere('time_limit', 0)->count();
     }
 }
