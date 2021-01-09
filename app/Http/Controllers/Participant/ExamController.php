@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Participant;
 use App\Http\Resources\QuestionResource;
 use App\Http\Resources\SectionResource;
 use App\Enums\CorrectStatus;
+use App\Enums\ExamStatus;
 use App\Models\Answer;
 use App\Models\Exam;
 use App\Http\Controllers\Controller;
@@ -47,7 +48,10 @@ class ExamController extends Controller
      */
     public function show($code)
     {
-        $exam = Exam::query()->where('code', $code)->firstOrFail();
+        $exam = Exam::query()->where('code', $code)
+            ->where('status_id', ExamStatus::Publish)
+            ->firstOrFail();
+
         return Inertia::render('Participant/Exam/Details', [
             'config' => new ConfigResource($exam->config),
             'creator' => $exam->user->name,

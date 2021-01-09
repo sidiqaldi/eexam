@@ -9,8 +9,8 @@ use App\Models\Question;
 
 class PublishExamService
 {
-    private $errors;
-    private $hasError;
+    public $errors;
+    public $hasError;
     public $errorLocations = [];
 
     const Config = 'config';
@@ -91,8 +91,8 @@ class PublishExamService
 
         if (!$exam->sections->count()) {
 
-            $validation->errors['section'][] = __('validation.no_sections');
-            $validation->errorLocations['section'] = true;
+            $validation->errors[__('Section')][] = __('validation.no_sections');
+            $validation->errorLocations[__('section')] = true;
         }
 
         $sections = $exam->sections;
@@ -101,7 +101,7 @@ class PublishExamService
 
         if (!static::isEachSectionHasQuestions($sections)) {
 
-            $validation->errors['question'][] = __('validation.no_question');
+            $validation->errors[__('Question')][] = __('validation.no_questions');
             $validation->errorLocations['question'] = true;
         }
 
@@ -111,20 +111,20 @@ class PublishExamService
 
         if (!static::isTotalScoreMatchThePassingGrade($totalScore, $sections, $config)) {
 
-            $validation->errors['question'][] = __('validation.need_question');
+            $validation->errors[__('Question')][] = __('validation.need_question');
             $validation->errorLocations['question'] = true;
         }
 
         if ($config->time_mode == TimeMode::PerSection) {
             if (static::isEmptySectionTimeLimitExist($exam)) {
 
-                $validation->errors['section'][] = __('validation.section_time_limit_empty');
+                $validation->errors[__('Section')][] = __('validation.section_time_limit_empty');
                 $validation->errorLocations['section'] = true;
             }
 
             if ($sections->sum('time_limit') > $config->time_limit) {
 
-                $validation->errors['config'][] = __('validation.section_time_limit');
+                $validation->errors[__('Config')][] = __('validation.section_time_limit');
                 $validation->errorLocations['config'] = true;
             }
         }
@@ -132,16 +132,18 @@ class PublishExamService
         if ($config->time_mode == TimeMode::PerQuestion) {
             if (static::isEmptyQuestionTimeLimitExist($sectionId)) {
 
-                $validation->errors['question'][] = __('validation.question_time_limit_empty');
+                $validation->errors[__('Question')][] = __('validation.question_time_limit_empty');
                 $validation->errorLocations['question'] = true;
             }
 
             if (Question::whereIn('section_id', $sectionId)->sum('time_limit') / 60 > $config->time_limit) {
 
-                $validation->errors['config'][] = __('validation.question_time_limit');
+                $validation->errors[__('Config')][] = __('validation.question_time_limit');
                 $validation->errorLocations['config'] = true;
             }
         }
+
+        $validation->hasError = !empty($validation->errors);
 
         return $validation;
     }

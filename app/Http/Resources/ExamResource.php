@@ -21,6 +21,7 @@ class ExamResource extends JsonResource
             'code' => $this->code,
             'status' => $this->status,
             'status_id' => $this->status_id,
+            'created_at' => $this->created_at->format('d M Y'),
         ];
     }
 }

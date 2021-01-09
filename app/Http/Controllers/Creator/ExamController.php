@@ -32,7 +32,7 @@ class ExamController extends Controller
             'filters' => $request->all('search'),
             'exams' => ExamResource::collection(
                 Exam::filter(new ExamFilter($request))
-                    ->select(['uuid', 'name' , 'description', 'code', 'status_id'])
+                    ->select(['uuid', 'name' , 'description', 'code', 'status_id', 'created_at'])
                     ->owner(Auth::user())
                     ->paginate($perPage)
                     ->appends($request->all('search'))

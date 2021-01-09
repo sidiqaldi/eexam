@@ -66,6 +66,14 @@ class Section extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
+    public function randomQuestions()
+    {
+        return $this->hasMany('App\Models\Question')->inRandomOrder();
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function answers()
     {
         return $this->hasMany('App\Models\Answer');
