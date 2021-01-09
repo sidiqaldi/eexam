@@ -205,7 +205,7 @@ class RecapService
             } else {
                 $sections = [];
 
-                foreach ($recap->result->section as $section) {
+                foreach ($recap->result->sections as $section) {
                     $sections[] = [
                         'name' => $section->name ?? '-',
                         'score' => $section->total_score ?? 0,
