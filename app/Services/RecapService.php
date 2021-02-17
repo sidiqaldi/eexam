@@ -219,7 +219,7 @@ class RecapService
                 $report->total_score = $recap->result->passing_grade ?? 0;
             }
 
-        } elseif ($config->result_stats == ResultStatus::ResultOnly) {
+        } elseif ($config->result_status == ResultStatus::ResultOnly) {
             $report->result = isset($recap->result->status) ? RecapResultStatus::getDescription($recap->result->status)
                 : RecapResultStatus::getDescription(RecapResultStatus::Failed);
         } else {
