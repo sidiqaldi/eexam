@@ -8,7 +8,9 @@
             <vue-countdown v-if="config.data.time_mode == 2" :time="time_limit" tag="p" @end="forceFinish">
                 <template
                     slot-scope="props"
-                >Sisa waktu：{{ props.minutes }} minutes, {{ props.seconds }} seconds.</template>
+                >
+                    Sisa waktu：<span v-if="props.hours">{{ props.hours }} jam, </span><span v-if="props.minutes">{{ props.minutes }} menit, </span>{{ props.seconds }} detik.
+                </template>
             </vue-countdown>
         </template>
 

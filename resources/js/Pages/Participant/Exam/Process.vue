@@ -9,17 +9,23 @@
             <vue-countdown v-if="config.data.time_mode == 2" :time="time_limit" tag="p" @end="forceFinish">
                 <template
                     slot-scope="props"
-                >Sisa waktu：{{ props.minutes }} minutes, {{ props.seconds }} seconds.</template>
+                >
+                    Sisa waktu：<span v-if="props.hours">{{ props.hours }} jam, </span><span v-if="props.minutes">{{ props.minutes }} menit, </span>{{ props.seconds }} detik.
+                </template>
             </vue-countdown>
             <vue-countdown v-if="config.data.time_mode == 3" :time="section_limit" tag="p" @end="forceNextSection">
                 <template
                     slot-scope="props"
-                >Sisa waktu sesi：{{ props.minutes }} minutes, {{ props.seconds }} seconds.</template>
+                >
+                    Sisa waktu sesi：<span v-if="props.hours">{{ props.hours }} jam, </span><span v-if="props.minutes">{{ props.minutes }} menit, </span>{{ props.seconds }} detik.
+                </template>
             </vue-countdown>
             <vue-countdown v-if="config.data.time_mode == 4" :time="question_limit" tag="p" @end="forceNextQuestion">
                 <template
                     slot-scope="props"
-                >Sisa waktu sesi：{{ props.minutes }} minutes, {{ props.seconds }} seconds.</template>
+                >
+                    Sisa waktu sesi：<span v-if="props.hours">{{ props.hours }} jam, </span><span v-if="props.minutes">{{ props.minutes }} menit, </span>{{ props.seconds }} detik.
+                </template>
             </vue-countdown>
         </template>
 
