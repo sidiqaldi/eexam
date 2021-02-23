@@ -113,7 +113,7 @@
                         </div>
 
                         <div v-if="form.question_type == 2" class="col-span-6 sm:col-span-4">
-                            <jet-label for="question_image" value="Gambar *"/>
+                            <jet-label for="question_image" value="URL Gambar *"/>
                             <jet-input id="question_image" ref="question_image" v-model="form.question_image"
                                        autocomplete="question_image"
                                        class="mt-1 block w-full"

@@ -65,8 +65,8 @@
                             <b> Pertanyaan. {{ questionNumber }} </b>
                             <div v-if="question" class="col-auto mt-3 border p-3 mb-5">
                                 <div class="prose" v-html="compiledQuestionMarkdown"></div>
-                                <div v-if="question.type == 2" class="mb-3">
-                                    <img :src="question.image" alt="preview" class="img-fluid border" @error="imgError"/>
+                                <div v-if="question.data.type == 2" class="mb-3">
+                                    <img :src="question.data.image" alt="preview" class="img-fluid border" @error="imgError"/>
                                 </div>
                             </div>
                             <div v-for="(option, key) in options.data" :key="key" class="cursor-pointer my-3"
@@ -77,7 +77,7 @@
                                     <span>{{ alpha(key) }}.</span>
                                     <img
                                         v-if="option.type == 2"
-                                        :src="option.image"
+                                        :src="option.value"
                                         alt="preview"
                                         class="img-fluid border"
                                         @error="imgError"
@@ -289,7 +289,11 @@ export default {
 
         forceFinish() {
             this.$inertia.post('/participant/exams/finish/' + this.participant.data.uuid)
-        }
+        },
+
+        imgError(e) {
+            e.target.src = "/img/404.jpg";
+        },
     }
 }
 </script>
