@@ -39,7 +39,7 @@
                                 <li v-for="(option, key) in form.options" :key="key" class="prose">
                                     <img
                                         v-if="option.type == 2"
-                                        :src="option.image || '/img/404.jpg'"
+                                        :src="option.value || '/img/404.jpg'"
                                         alt="preview"
                                         class="img-fluid border"
                                         @error="imgError"
@@ -128,7 +128,9 @@
                             <div v-for="(option, key) in form.options" :key="option.key"
                                  class="w-full gap-4 justify-items-start my-2">
                                 <div class="inline">
-                                    <input-basic-select v-model="option.type" class="form-control">
+                                    <input-basic-select
+                                        v-model="option.type" class="form-control"
+                                        v-on:input="duplicateValue(option.image = option.value)">
                                         <option v-for="(type, index) in input_type" :key="index" :value="index">{{
                                                 type
                                             }}
@@ -145,10 +147,11 @@
                                     />
                                     <jet-input
                                         v-else-if="option.type == 2"
-                                        v-model="option.image"
+                                        v-model="option.value"
                                         class="form-control"
                                         placeholder="contoh: https://dummyimage.com/300x200/b8b8b8/fff.jpg"
                                         type="text"
+                                        v-on:input="duplicateValue(option.image = option.value)"
                                     />
                                 </div>
                                 <div class="inline">
@@ -166,7 +169,7 @@
                                     </jet-danger-button>
                                 </div>
                                 <jet-input-error :message="$page.errors['options.'+key+'.value']"/>
-                                <jet-input-error :message="$page.errors['options.'+key+'.image']"/>
+                                <jet-input-error v-if="!$page.errors['options.'+key+'.value']" :message="$page.errors['options.'+key+'.image']"/>
                             </div>
                         </div>
 
@@ -256,6 +259,9 @@ export default {
         this.form.question_type = this.question.type;
         this.form.question_image = this.question.image;
         this.form.options = this.question.options;
+        this.form.options.forEach(option => {
+            option.image = option.value
+        });
     },
     computed: {
         compiledMarkdown: function () {
@@ -282,6 +288,9 @@ export default {
                 this.answerKey = null;
             }
             Vue.delete(this.form.options, key);
+        },
+        duplicateValue(model, value) {
+            model = value;
         },
         addOption() {
             this.form.options.push({

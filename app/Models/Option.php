@@ -11,7 +11,6 @@ use Ramsey\Uuid\Uuid;
  * @method static self where(int|null $id)
  * @method static self owner(\Illuminate\Contracts\Auth\Authenticatable|null $user)
  * @method static self paginate($perPage)
- * @method static create(array $data)
  * @property mixed id
  * @property mixed correct_id
  */
